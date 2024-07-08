@@ -170,4 +170,82 @@ fn main() {
 
     assert_eq!(avg, 45.1);
     println!("Test passed!");
+
+    println!("----------------------------- Arrays -------------------------------------");
+    // Compound Data Types
+    // Array Data Type
+    let letters = ['a', 'b', 'c'];
+    let first_letter = letters[0];
+    println!("first_letter is {}", first_letter);
+
+    let mut mut_letters = ['a', 'b', 'c'];
+    mut_letters[0] = 'X';
+    let first_letter = mut_letters[0];
+    println!("mut_letter is {}", first_letter);
+
+    //uninitialized array
+    //let numbers : [i32; 5];
+    //println!("last number is {}", numbers[4])
+    // this will cause an error uninitialized array
+
+    println!("--------------- Initialization ------------------------------");
+    let numbers: [i32; 5];
+    numbers = [0, 0, 0, 0, 0];
+    println!("last number is {}", numbers[4]);
+
+    // Short Initializer
+    println!("----------------- Short Initialization -----------------------");
+    let numbers: [i32; 5] = [0; 5];
+    println!("last number is {}", numbers[4]);
+
+    println!("----------------- Out Bound Index in Compile Time --------------------");
+    // let numbers: [i32; 5] = [0; 5];
+    // println!("last number is {}", numbers[5])
+
+    println!("----------------- Out Bound Index in Runtime -----------------------");
+    // let numbers: [i32; 5] = [0; 5];
+    // let len = numbers.len();
+    // println!("last number is {}", numbers[len])
+
+    println!("----------------- Multidimensional Arrays -----------------------");
+    let parking_lot = [[1, 2, 3], [4, 5, 6]];
+    let number = parking_lot[0][1];
+    println!("number is {}", number);
+
+    let number = parking_lot[1][1];
+    println!("number is {}", number);
+
+    println!("----------------- Multidimensional Definition Arrays -----------------------");
+    let parking_lot_multiple: [[[i32; 10]; 10]; 10];
+    let garage = [[[0; 10]; 10]; 10];
+    println!("array[0][0][0] is {}", garage[0][0][0]);
+
+    println!("----------------- Tuples Data Type -----------------------");
+    let stuff = (10, 3.1416, 'X');
+    let stuff_2: (i32, f32, char) = (10, 3.1416, 'X'); // Definition with assignation
+    let first_item = stuff.0;
+    let second_item = stuff.1;
+    let third_item = stuff.2;
+    println!("first_item: {}", first_item);
+    println!("second_item: {}", second_item);
+    println!("third_item: {}", third_item);
+
+    println!("------------------ Mutable Tuple Data Type ----------------------");
+    let mut stuff = (10, 3.1416, 'X');
+    stuff.0 = 5;
+    let first_item = stuff.0;
+    let second_item = stuff.1;
+    let third_item = stuff.2;
+    println!("first_item: {}", first_item);
+    println!("second_item: {}", second_item);
+    println!("third_item: {}", third_item);
+
+    println!("------------------ Deconstruct Tuple Data Type ----------------------");
+    let (a, b, c) = stuff;
+    println!("a is {}, b is {}, c is {}", a, b ,c);
+
+
+
+
+
 }
