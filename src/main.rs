@@ -152,4 +152,13 @@ fn main() {
     // Notes:
     // You can not compare different data types, just same date type
     // Validate Changes
+
+    // Char Data Type
+    let letter = 'a';
+    let number = '1';
+    let finger = '\u{261D}';
+    println!();
+    println!("{}\n{}\n{}", letter, number, finger);
+
+
 }
