@@ -121,4 +121,34 @@ fn main() {
     //let c = (a ^ b) && panic!();
     //println!("c is {}", c);
 
+    println!();
+    println!("--- Comparison Operations ---");
+
+    let a = 1;
+    let b = 2;
+    println!("a is {} and b is {}", a, b);
+    println!("a EQUAL TO b is {}", a == b);
+    println!("a NOT EQUAL TO b is {}", a != b);
+    println!("a GREATER THAN b is {}", a > b);
+    println!("a GREATER THEN OR EQUAL TO b is {}", a >= b);
+    println!("a LESS THAN b is {}", a < b);
+    println!("a LESS THAN OR EQUAL TO b is {}", a <= b);
+    println!();
+
+    println!();
+    println!("--- Comparison Operations using Booleans ---");
+
+    let a = true;
+    let b = false;
+    println!("a is {} and b is {}", a, b);
+    println!("a EQUAL TO b is {}", a == b);
+    println!("a NOT EQUAL TO b is {}", a != b);
+    println!("a GREATER THAN b is {}", a > b);
+    println!("a GREATER THEN OR EQUAL TO b is {}", a >= b);
+    println!("a LESS THAN b is {}", a < b);
+    println!("a LESS THAN OR EQUAL TO b is {}", a <= b);
+    println!();
+
+    // Notes:
+    // You can not compare different data types, just same date type
 }
