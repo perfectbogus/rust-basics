@@ -83,5 +83,42 @@ fn main() {
     let shifted_right = shift_right >> 3;
     println!("shifted rig {:08b}", shifted_right);
 
+    // Boolean Data Type and Operations
+    let a: bool = true;
+    let b: bool = false;
+
+    println!("a is {} and b is {}", a, b);
+    println!("NOT a is {}", !a);
+    println!("a AND b is {}", a & b);
+    println!("a OR b is {}", a | b);
+    println!("a XOR b is {}", a ^ b);
+
+    let c = (a ^ b) | (a & b);
+    println!("c is {}", c);
+
+    // Similar to lazy evaluation in boolean expressions
+    // AND
+    // false & true  -> false
+    // false & false -> false
+    // so you only need to look at the left section
+    // OR
+    // true | false -> true
+    // true | true  -> true
+    // so you only need to evaluate the left side
+
+    // Short-Circuiting Logical Operations
+    // false && [not evaluated] -> false
+    // true || [not evaluated]  -> true
+    let c = (a ^ b) || (a & b);
+    println!("c is {}", c);
+
+    // Use panic macro to validate Short-Circuiting Logical
+    let c = (a ^ b) || panic!();
+    println!("c is {}", c);
+
+    // Use panic macro to validate Short-Circuiting Logical
+    // this case will execute the panic macro
+    //let c = (a ^ b) && panic!();
+    //println!("c is {}", c);
 
 }
