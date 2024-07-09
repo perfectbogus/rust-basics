@@ -244,6 +244,9 @@ fn main() {
     let (a, b, c) = stuff;
     println!("a is {}, b is {}, c is {}", a, b ,c);
 
+    println!("---------------------- Diff Statement and Expression -----------------");
+    println!("Expression return a value");
+    println!("Statement does not return a value");
 
 
 
