@@ -248,6 +248,125 @@ fn main() {
     println!("Expression return a value");
     println!("Statement does not return a value");
 
+    println!("--- Program Flow Control ---");
+    let x = 3;
+    if x == 3 {
+        println!("x is 3");
+    }
+
+    // You cannot use an integer into if expression
+    // if x {} this will cause an error
+
+    // You can use booleans
+    // if true {} this is allowed
+
+    let x = 3;
+    let y = 5;
+
+    if x > y {
+        println!("x is greater than y");
+    } else {
+        println!("x is not greater than y");
+    }
+
+    println!();
+    println!("--- Nested if else ---");
+    if x > y {
+        println!("x is greater than y");
+    } else {
+        if x < y {
+            println!("x is less than y");
+        } else {
+            println!("x is equal to y");
+        }
+    }
+    println!();
+
+    println!("--- Improve expressions ---");
+    if x > y {
+        println!("x is greater than y");
+    } else if x < y {
+        println!("x is less than y");
+    } else {
+        println!("x is equal to y")
+    }
+
+    println!();
+    println!("--- Conditional Assignment ---");
+    let make_x_odd = true;
+    let x;
+
+    if make_x_odd {
+        x = 1;
+    } else {
+        x = 2;
+    }
+
+    // this cause an error due to you are not assign x in false case
+    // if make_x_odd {
+    //     x = 1;
+    // } else {
+    //
+    // }
+
+    println!();
+    println!("--- Loops ---");
+
+    let mut count = 0;
+
+    loop {
+        count += 1;
+        println!("count is {}", count);
+        if count == 100 {
+            break;
+        }
+    }
+
+    println!();
+    println!("--- loop assign with let ---");
+
+    let mut sum = 0;
+
+    let result = loop {
+        if sum == 10 {
+            break sum * 10;
+        }
+        sum += 1;
+        println!("sum is {}", sum);
+    };
+
+    println!("result is {}", result);
+
+    println!();
+    println!("--- while ---");
+
+    let mut count = 0;
+
+    while count < 10 {
+        count += 1;
+        println!("count is {}", count);
+    }
+
+    // Note: for loops and while
+    // infinite loops
+    // let result = loop {
+    //      // do something
+    //      break value;
+    // }
+    // this infinite loop allow you return a value even when its infinite
+
+    // while true {
+    //      // do something
+    //      break;
+    // }
+    // this infinite loop does not allow return a value
+
+
+
+
+
+
+
 
 
 
