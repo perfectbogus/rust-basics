@@ -432,9 +432,36 @@ fn main() {
     assert_eq!(mean, 12.5);
     println!("Test passed");
 
+    println!("--- Ownership ---");
+    if true {
+        let planet = "Earth";
+        println!("planet {planet}")
+    }
+    // if you try to use planet after here, you are going to get an error
 
+    println!("--- shadowing ---");
+    let planet = "Earth";
+    println!("planet is {planet}");
+    let planet = "Mars";
+    println!("planet is {planet}");
 
+    let planet = "Earth";
+    println!("planet is {planet}");
+    let planet = 4;
+    println!("planet is {planet}");
 
+    println!();
+    println!("--- Risk Shadowing ---");
+    let planet = "Earth";
+    {
+        println!("planet is {planet}");
+        let mut planet = 4;
+        println!("planet is {planet}");
+    }
+    println!("planet is {planet}");
+
+    println!();
+    println!("--- Stack and Heap Memory");
 
 
 
