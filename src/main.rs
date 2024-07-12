@@ -461,9 +461,69 @@ fn main() {
     println!("planet is {planet}");
 
     println!();
-    println!("--- Stack and Heap Memory");
+    println!("--- Stack and Heap Memory ---");
+    // Fixed size for variable on the stack
+    // Unknown size for variable on the heap
 
+    header("String Data Type");
+    //String Literal
+    //  Hardcoded
+    //  Immutable
+    //  Must be known before the compilation
 
+    //String Type
+    //  Allocated on the heap
+    //  Mutable
+    //  Dynamically generated at runtime
+    let message = String::from("Earth");
+    println!("message {message}");
 
+    // let it mutable
+    let mut message = String::from("Earth");
+    println!("message: {message}");
+    message.push_str(" is home");
+    println!("message: {message}");
 
+    header("Ownership");
+    // Copy
+    //  Done for stack-only data type such as integer and floating point
+    //  Copying occurs implicitly; cloning must be done explicitly
+
+    let rocket_fuel = 1;
+    process_fuel(rocket_fuel); // you do copy of rocket_fuel due to is a stack variable
+    println!("rocket fuel is {rocket_fuel}");
+
+    //let type_fuel = String::from("RP-1");
+    //process_type_fuel(type_fuel); //this fail because you are borrow a variable from heap memory
+    // and is using after pass to the function
+    //println!("type_fuel is {type_fuel}");
+
+    let type_fuel = String::from("RP-1");
+    let type_fuel = process_type_fuel(type_fuel);
+    println!("type_fuel is {type_fuel}");
+
+    let type_fuel = String::from("RP-1");
+    let type_fuel = process_new_fuel(type_fuel);
+    println!("new type_fuel is {type_fuel}");
+}
+
+fn process_new_fuel(propellant: String) -> String {
+    println!("processing propellant {propellant}");
+    let new_fuel = String::from("LNG");
+    new_fuel
+}
+
+fn process_type_fuel(propellant: String) -> String{
+    println!("Processing propellant {propellant}");
+    propellant
+}
+
+fn process_fuel(mut propellant: i32) {
+    propellant += 1;
+    println!("processing propellant {propellant}");
+}
+
+fn header(message: &str){
+    println!();
+    println!("----- {message} ------");
 }
