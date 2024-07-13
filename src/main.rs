@@ -505,6 +505,115 @@ fn main() {
     let type_fuel = String::from("RP-1");
     let type_fuel = process_new_fuel(type_fuel);
     println!("new type_fuel is {type_fuel}");
+
+    header("References");
+    println!("--- Borrowing References ---");
+    let rocket_fuel = String::from("RP-1");
+    let (rocket_fuel, length) = process_tuple(rocket_fuel);
+    println!("rocket_fuel is {rocket_fuel} and {length}");
+
+    println!();
+    println!("--- Borrow Data ---");
+    let data_str = String::from("RP-1");
+    let length = borrow_data(&data_str); // this will create like a pointer to the reference of
+    // data_str
+    println!("length is {length} and data_str is {data_str}");
+
+    // if you want to modify a borrow reference
+    println!();
+    println!("--- Mutable Borrow Reference ---");
+    let mut data_str = String::from("first string");
+    let length = mutable_borrow_reference(&mut data_str);
+    println!("data length is {length}");
+    println!("Restrictions for mutable borrow references");
+    println!("  1: When using a mutable reference, you cannot create other references");
+    println!("  2: Prevents data races");
+
+    println!("Accepted Cases for Mutable References:");
+    println!("--- Only one Mutable Reference ---");
+    println!(" let ref1 = &mut var;");
+    println!("--- Multiple  Immutable References ---");
+    println!("let ref1 = &var;");
+    println!("let ref2 = &var;");
+    println!();
+    println!("Not Accepted Cases fro Mutable References:");
+    println!("--- 1 Mutable + Any Other References ---");
+    println!("let ref1 = &mut var;");
+    println!("let ref2 = &var;");
+    println!();
+
+    // This function cause a dangling reference due to there is no owner of dangling variable
+    // fn dangling_reference() -> &String {
+    //     let dangling = String::from("Dangling reference");
+    //     &dangling
+    // }
+    println!("--- dangling references ---");
+    let rocket_fuel = produce_fuel();
+    println!("rocker fuel {rocket_fuel}");
+    println!();
+
+    header("Slice");
+
+    let message = String::from("Greetings from Earth!");
+    println!("message is {message}");
+
+    let last_word = &message; //full string
+    let last_word = &message[15..15+5];
+    println!("slice[15..15+5] is {last_word}");
+
+    // in order to get last char
+    let last_word = &message[15..];
+    println!("slice [15..] is {last_word}");
+
+    println!("String Slices is in Bytes not Characters");
+    println!("&String != &str");
+    println!("Borrow Reference is not String Slice");
+
+    // This is called Cohersion
+    let message = String::from("Greetings from Earth");
+    let first = get_first(&message[10..]);//you are passing an Slice String
+    println!("first is {first}");
+
+    let message = String::from("Greetings from Earth");
+    let first = get_first(&message);// you are using a Borrow Reference to String
+    println!("first is {first}");
+}
+
+fn get_first(s: &str) -> &str {
+    let bytes = s.as_bytes();
+    for (index, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &s[..index];
+        }
+    }
+    &s
+}
+
+
+fn produce_fuel() -> String {
+    let new = String::from("RP-1");
+    return new;
+}
+
+
+
+fn mutable_borrow_reference(data_str: &mut String) -> usize {
+    println!("data is {data_str}");
+    data_str.push_str(" adding more characters");
+    data_str.len()
+}
+
+fn borrow_data(borrow_string: &String) -> usize {
+    println!("Borrow String: {borrow_string}");
+    borrow_string.len()
+}
+
+
+
+fn process_tuple(propellant: String) -> (String, usize) {
+    println!("processing propellant {propellant}");
+    let length = propellant.len();
+    (propellant, length)
 }
 
 fn process_new_fuel(propellant: String) -> String {
