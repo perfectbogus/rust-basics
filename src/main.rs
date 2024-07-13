@@ -577,6 +577,97 @@ fn main() {
     let message = String::from("Greetings from Earth");
     let first = get_first(&message);// you are using a Borrow Reference to String
     println!("first is {first}");
+
+    header("Challenge: Trim Spaces");
+
+    let test1 = "We need more space.";
+    println!("--- Test 1 ---");
+    assert_eq!(trim_spaces(test1), "We need more space.");
+
+    println!("--- Test 2 ---");
+    let test2 = String::from("   There's space in front.");
+    assert_eq!(trim_spaces(&test2), "There's space in front.");
+
+    println!("--- Test 3 ---");
+    let test3 = String::from("There's space to the rear. ");
+    assert_eq!(trim_spaces(&test3[..]), "There's space to the rear.");
+
+    println!("--- Test 4 ---");
+    let test4 = "  We're surrounded by space!    ";
+    assert_eq!(trim_spaces(test4), "We're surrounded by space!");
+
+    println!("--- Test 5 ---");
+    let test5 = "     ";
+    assert_eq!(trim_spaces(test5), "");
+
+    println!("--- Test 6 ---");
+    let test6 = "";
+    assert_eq!(trim_spaces(test6), "");
+
+    println!("--- Test 7 ---");
+    let test7 = " 🚀 ";
+    assert_eq!(trim_spaces(test7), "🚀");
+    println!("Tests passed!");
+
+    header("Modules");
+}
+
+fn trim_spaces(s: &str) -> &str {
+    let mut start = 0;
+    for (index, character) in s.chars().enumerate() {
+        println!("front index: {index} and Char {character}");
+        if character != ' ' {
+            start = index;
+            break;
+        }
+    }
+
+    let mut end = 0;
+    for (index, character) in s.chars().rev().enumerate() {
+        println!("back index: {index} and Char {character}");
+        if character != ' ' {
+            end = s.len() - index;
+            break;
+        }
+    }
+    println!("Start: {start}, End: {end}");
+    &s[start..end]
+}
+
+fn my_trim_spaces(data: &str) -> &str {
+    let lower_index = count_front_spaces(data);
+    let inter_index = count_back_spaces(data);
+
+    if lower_index == data.len() && inter_index == data.len() {
+        ""
+    } else {
+        let upper_index = data.len() - inter_index;
+        &data[lower_index..upper_index]
+    }
+}
+
+fn count_back_spaces(data: &str) -> usize {
+    let mut last_index = 0;
+    for &item in data.as_bytes().iter().rev() {
+        if item == b' ' {
+            last_index += 1;
+        } else {
+            break;
+        }
+    }
+    last_index
+}
+
+fn count_front_spaces(data: &str) -> usize {
+    let mut last_index = 0;
+    for &item in data.as_bytes().iter(){
+        if item == b' ' {
+            last_index += 1;
+        } else {
+            break;
+        }
+    }
+    last_index
 }
 
 fn get_first(s: &str) -> &str {
