@@ -1,5 +1,6 @@
 use std::cmp::max;
 use std::i32::MAX;
+use std::io;
 
 fn main() {
     let mut x = 10;
@@ -610,6 +611,17 @@ fn main() {
     println!("Tests passed!");
 
     header("Modules");
+    let mut buffer = String::new();
+    println!("Enter a message:");
+    io::stdin().read_line(&mut buffer);
+    println!("Buffer is {buffer}");
+
+    // turbofish operator
+    let number = buffer.trim().parse::<i32>();
+    println!("number plus one: {}", number.unwrap()+1);
+
+    let number: i32 = buffer.trim().parse().unwrap();
+    println!("second method: {}", number);
 }
 
 fn trim_spaces(s: &str) -> &str {
