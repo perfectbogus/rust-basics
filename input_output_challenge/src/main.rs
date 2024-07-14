@@ -1,6 +1,7 @@
 use std::env;
-use std::fs;
-use std::io::read_to_string;
+use std::fs::File;
+use std::io::{self, BufRead};
+use std::path::Path;
 
 fn main() {
     if env::args().len() <= 2 {
@@ -17,12 +18,20 @@ fn main() {
     let name_to_search = env::args().nth(2).unwrap();
     println!("name to search: {name_to_search}");
 
-    let content = read_to_string(&path_file)
-        .unwrap()
-        .lines()
-        .map(String::from)
-        .collect();
+    if let Ok(lines) = read_lines(path_file) {
+        for line in lines.flatten() {
+            if line == name_to_search {
+                println!("{name_to_search} did walk on the Moon");
+                return;
+            }
+        }
+    }
 
+    println!("{name_to_search} did not walk on the moon")
+}
 
-
+fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
+where P: AsRef<Path>, {
+    let file = File::open(filename)?;
+    Ok(io::BufReader::new(file).lines())
 }
