@@ -611,17 +611,133 @@ fn main() {
     println!("Tests passed!");
 
     header("Modules");
-    let mut buffer = String::new();
-    println!("Enter a message:");
-    io::stdin().read_line(&mut buffer);
-    println!("Buffer is {buffer}");
+    // let mut buffer = String::new();
+    // println!("Enter a message:");
+    // io::stdin().read_line(&mut buffer);
+    // println!("Buffer is {buffer}");
 
     // turbofish operator
-    let number = buffer.trim().parse::<i32>();
-    println!("number plus one: {}", number.unwrap()+1);
+    // let number = buffer.trim().parse::<i32>();
+    // println!("number plus one: {}", number.unwrap()+1);
 
-    let number: i32 = buffer.trim().parse().unwrap();
-    println!("second method: {}", number);
+    // let number: i32 = buffer.trim().parse().unwrap();
+    // println!("second method: {}", number);
+
+    header("Tuple Data Type");
+    let vehicle: Shuttle = Shuttle {
+        name: String::from("Endeavour"),
+        crew_size: 7,
+        propellant: 890.0
+    };
+    println!("Vehicle Name: {}", vehicle.name);
+
+    header("Struct Update Syntax");
+    let mut vehicle: Shuttle = Shuttle {
+        name: String::from("Atlantis"),
+        crew_size: 8,
+        propellant: 1000.0
+    };
+    println!("vehicle is {:?}", vehicle);
+
+
+    let vehicle2 = Shuttle {
+        name: String::from("Discovery"),
+        ..vehicle
+    };
+    println!("vehicle {:?} and vehicle2 {:?}", vehicle, vehicle2 );
+    let mut vehicle: Shuttle = Shuttle {
+        name: String::from("Endeavour"),
+        crew_size: 7,
+        propellant: 0.0
+    };
+
+    header("Struct Methods");
+    let vehicle_name = vehicle.get_name();
+    println!("vehicle_name is {}", vehicle_name);
+
+    println!("propellant is {}", vehicle.propellant);
+    vehicle.add_fuel(500.0);
+    println!("propellant is {}", vehicle.propellant);
+
+    header("Associated Functions");
+    let mut vehicle = Shuttle::new("Endeavour");
+    let vehicle_name = vehicle.get_name();
+    println!("vehicle_name is {}", vehicle_name);
+
+    println!("propellant is {}", vehicle.propellant);
+    vehicle.add_fuel(10000.0);
+    println!("propellant is {}", vehicle.propellant);
+
+    header("Tuple Structs");
+    let red: Color = Color(255, 0, 0);
+    println!("First value is {}", red.0);
+
+    let coord = Point(0, 0);
+    let y = get_y(coord);
+    println!("Y is {}", y);
+
+    header("Challenge: Represent Shapes");
+    let mut rect = Rectangle::new(1.2, 3.4);
+    assert_eq!(rect.get_area(), 4.08);
+    rect.scale(0.5);
+    assert_eq!(rect.get_area(), 1.02);
+    println!("Tests Passed!");
+
+}
+
+struct Rectangle {
+    width: f64,
+    height: f64
+}
+
+impl Rectangle {
+    fn get_area(&self) -> f64 {
+        self.height * self.width
+    }
+
+    fn scale(&mut self, scale: f64) {
+        self.width *= scale;
+        self.height *= scale;
+    }
+
+    fn new(width: f64, height: f64) -> Rectangle {
+        Rectangle {
+            width,
+            height
+        }
+    }
+}
+struct Point(u8, u8); //XY
+
+fn get_y(p: Point) -> u8 {
+    p.1
+}
+struct Color(u8, u8, u8); //RGB
+
+#[derive(Debug)]
+#[derive(Clone)]
+struct Shuttle {
+    name: String,
+    crew_size: u8,
+    propellant: f64
+}
+
+impl Shuttle {
+    fn get_name(&self) -> &str {
+        &self.name
+    }
+
+    fn add_fuel(&mut self, gallons: f64) {
+        self.propellant += gallons;
+    }
+
+    fn new(name: &str) -> Shuttle {
+        Shuttle {
+            name: String::from(name),
+            crew_size: 7,
+            propellant: 0.0
+        }
+    }
 }
 
 fn trim_spaces(s: &str) -> &str {
