@@ -1,6 +1,7 @@
 use std::cmp::max;
 use std::i32::MAX;
 use std::io;
+use std::ops::Add;
 
 fn main() {
     let mut x = 10;
@@ -683,6 +684,32 @@ fn main() {
     assert_eq!(rect.get_area(), 1.02);
     println!("Tests Passed!");
 
+    header("Challenge Generics: Sum Boxes");
+    let one = Box::new(1);
+    let two = Box::new(2);
+
+    assert_eq!(*sum_boxes(one, two), 3);
+
+    let pi = Box::new(3.14159);
+    let e = Box::new(2.71828);
+    assert_eq!(*sum_boxes(pi, e), 5.85987);
+    println!("Tests Passed!");
+
+    let a = 3;
+    let b = 4;
+    let c = 3.1;
+
+    my_function(a, b);
+    my_function(a, c);
+
+}
+
+fn my_function<T, U>(a: T, b: U) {
+
+}
+
+fn sum_boxes<T: Add<Output = T>>(a: Box<T>, b: Box<T>) -> Box<T> {
+    Box::new(*a + *b)
 }
 
 struct Rectangle {
