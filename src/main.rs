@@ -247,7 +247,7 @@ fn main() {
 
     println!("------------------ Deconstruct Tuple Data Type ----------------------");
     let (a, b, c) = stuff;
-    println!("a is {}, b is {}, c is {}", a, b ,c);
+    println!("a is {}, b is {}, c is {}", a, b, c);
 
     println!("---------------------- Diff Statement and Expression -----------------");
     println!("Expression return a value");
@@ -372,7 +372,7 @@ fn main() {
 
     for (index, &item) in message.iter().enumerate() {
         println!("item {} is {}", index, item);
-        if item == 'c'{
+        if item == 'c' {
             break;
         }
     }
@@ -416,7 +416,7 @@ fn main() {
 
     for &num in numbers.iter() {
         if num > max {
-           max = num;
+            max = num;
         }
 
         if num < min {
@@ -560,7 +560,7 @@ fn main() {
     println!("message is {message}");
 
     let last_word = &message; //full string
-    let last_word = &message[15..15+5];
+    let last_word = &message[15..15 + 5];
     println!("slice[15..15+5] is {last_word}");
 
     // in order to get last char
@@ -573,11 +573,11 @@ fn main() {
 
     // This is called Cohersion
     let message = String::from("Greetings from Earth");
-    let first = get_first(&message[10..]);//you are passing an Slice String
+    let first = get_first(&message[10..]); //you are passing an Slice String
     println!("first is {first}");
 
     let message = String::from("Greetings from Earth");
-    let first = get_first(&message);// you are using a Borrow Reference to String
+    let first = get_first(&message); // you are using a Borrow Reference to String
     println!("first is {first}");
 
     header("Challenge: Trim Spaces");
@@ -628,7 +628,7 @@ fn main() {
     let vehicle: Shuttle = Shuttle {
         name: String::from("Endeavour"),
         crew_size: 7,
-        propellant: 890.0
+        propellant: 890.0,
     };
     println!("Vehicle Name: {}", vehicle.name);
 
@@ -636,7 +636,7 @@ fn main() {
     let mut vehicle: Shuttle = Shuttle {
         name: String::from("Atlantis"),
         crew_size: 8,
-        propellant: 1000.0
+        propellant: 1000.0,
     };
     println!("vehicle is {:?}", vehicle);
 
@@ -645,11 +645,11 @@ fn main() {
         name: String::from("Discovery"),
         ..vehicle
     };
-    println!("vehicle {:?} and vehicle2 {:?}", vehicle, vehicle2 );
+    println!("vehicle {:?} and vehicle2 {:?}", vehicle, vehicle2);
     let mut vehicle: Shuttle = Shuttle {
         name: String::from("Endeavour"),
         crew_size: 7,
-        propellant: 0.0
+        propellant: 0.0,
     };
 
     header("Struct Methods");
@@ -702,19 +702,96 @@ fn main() {
     my_function(a, b);
     my_function(a, c);
 
+    header("Traits");
+    let hubble = Satellite {
+        name: String::from("Hubble Telescope"),
+        velocity: 4.72,
+    };
+
+    // specify the tait function
+    let iss = SpaceStation {
+        name: String::from("International Space Station"),
+        crew_size: 6,
+        altitude: 254,
+    };
+
+    // default trait function
+    let moon = NaturalSatellite {
+        name: String::from("Moon")
+    };
+
+    println!("Hubble is {}", hubble.describe());
+    println!("ISS is {}", iss.describe());
+    println!("Moon is {}", moon.describe());
+
+    header("Derive traits");
+    let hubble = Satellite {
+        name: String::from("Hubble Telescope"),
+        velocity: 4.72,
+    };
+    let gps = Satellite {
+        name: String::from("GPS"),
+        velocity: 2.42,
+    };
+    println!("hubble == gps is {}", hubble == gps);
+    // here is comparing size of the name and not the velocity
+    println!("hubble == gps is {}", hubble > gps);
+
+    header("Trait Bounds");
+
+
 }
 
-fn my_function<T, U>(a: T, b: U) {
-
+trait Description {
+    // default trait
+    fn describe(&self) -> String {
+        String::from("An object flying through space")
+    }
 }
 
-fn sum_boxes<T: Add<Output = T>>(a: Box<T>, b: Box<T>) -> Box<T> {
+// will uses the default trait describe function
+impl Description for NaturalSatellite {}
+
+// will implement their own describe function
+impl Description for Satellite {
+    fn describe(&self) -> String {
+        format!("the {} flying at {} miles per second!", self.name, self.velocity)
+    }
+}
+
+// implement their own describe function
+impl Description for SpaceStation {
+    fn describe(&self) -> String {
+        format!("the {} flying at {} miles high with {} crew member aboard!", self.name, self.altitude, self.crew_size)
+    }
+}
+
+struct NaturalSatellite {
+    name: String,
+}
+
+#[derive(PartialEq, PartialOrd)]
+struct Satellite {
+    name: String,
+    velocity: f64,
+}
+
+struct SpaceStation {
+    name: String,
+    crew_size: u8,
+    altitude: u32,
+}
+
+
+fn my_function<T, U>(a: T, b: U) {}
+
+fn sum_boxes<T: Add<Output=T>>(a: Box<T>, b: Box<T>) -> Box<T> {
     Box::new(*a + *b)
 }
 
 struct Rectangle {
     width: f64,
-    height: f64
+    height: f64,
 }
 
 impl Rectangle {
@@ -730,15 +807,17 @@ impl Rectangle {
     fn new(width: f64, height: f64) -> Rectangle {
         Rectangle {
             width,
-            height
+            height,
         }
     }
 }
+
 struct Point(u8, u8); //XY
 
 fn get_y(p: Point) -> u8 {
     p.1
 }
+
 struct Color(u8, u8, u8); //RGB
 
 #[derive(Debug)]
@@ -746,7 +825,7 @@ struct Color(u8, u8, u8); //RGB
 struct Shuttle {
     name: String,
     crew_size: u8,
-    propellant: f64
+    propellant: f64,
 }
 
 impl Shuttle {
@@ -762,7 +841,7 @@ impl Shuttle {
         Shuttle {
             name: String::from(name),
             crew_size: 7,
-            propellant: 0.0
+            propellant: 0.0,
         }
     }
 }
@@ -815,7 +894,7 @@ fn count_back_spaces(data: &str) -> usize {
 
 fn count_front_spaces(data: &str) -> usize {
     let mut last_index = 0;
-    for &item in data.as_bytes().iter(){
+    for &item in data.as_bytes().iter() {
         if item == b' ' {
             last_index += 1;
         } else {
@@ -842,7 +921,6 @@ fn produce_fuel() -> String {
 }
 
 
-
 fn mutable_borrow_reference(data_str: &mut String) -> usize {
     println!("data is {data_str}");
     data_str.push_str(" adding more characters");
@@ -853,7 +931,6 @@ fn borrow_data(borrow_string: &String) -> usize {
     println!("Borrow String: {borrow_string}");
     borrow_string.len()
 }
-
 
 
 fn process_tuple(propellant: String) -> (String, usize) {
@@ -868,7 +945,7 @@ fn process_new_fuel(propellant: String) -> String {
     new_fuel
 }
 
-fn process_type_fuel(propellant: String) -> String{
+fn process_type_fuel(propellant: String) -> String {
     println!("Processing propellant {propellant}");
     propellant
 }
@@ -878,7 +955,7 @@ fn process_fuel(mut propellant: i32) {
     println!("processing propellant {propellant}");
 }
 
-fn header(message: &str){
+fn header(message: &str) {
     println!();
     println!("----- {message} ------");
 }
