@@ -781,7 +781,48 @@ fn main() {
     assert_eq!(earth == pluto, true);
 
 
-    header("Lifetimes")
+    header("Lifetimes");
+    header("Borrow Checker");
+    //this code does not compile due to Borrow Checker over rp1 is out of scope
+    //when is assigned to propellant
+    //let propellant;
+    //{
+    //  let rp1 = String::from("RP-1");
+    //  propellant = &rp1;
+    //}
+    //println!("propellant is {}", propellant);
+    header("Lifetime annotation syntax");
+    // let result;
+    // let p1 = String::from("RP-1");
+    // let p2 = String::from("LNG");
+    // result = best_fuel(&p1, &p2);
+    // println!("result is {}", result);
+
+    let result;
+    let p1 = String::from("RP-1");
+    let p2 = String::from("LNG");
+    result = best_fuel(&p1, &p2);
+    println!("result is {}", result);
+
+    header("Multiple Lifetime Annotations");
+
+}
+// No Compile Error
+// fn best_fuel(x: &str, y: &str) -> &str {
+//     if x.len() > y.len() {
+//         x
+//     } else {
+//         y
+//     }
+// }
+
+// Syntax with lifetime definition
+fn best_fuel<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() {
+        x
+    } else {
+        y
+    }
 }
 
 struct Planet {
