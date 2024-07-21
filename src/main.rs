@@ -1,7 +1,9 @@
-use std::cmp::max;
+use std::cmp::{max, Ordering};
 use std::i32::MAX;
 use std::io;
 use std::ops::Add;
+use std::{any, fmt};
+use std::fmt::Formatter;
 
 fn main() {
     let mut x = 10;
@@ -306,7 +308,7 @@ fn main() {
     } else {
         x = 2;
     }
-
+    println!("value x is {}", x);
     // this cause an error due to you are not assign x in false case
     // if make_x_odd {
     //     x = 1;
@@ -457,7 +459,7 @@ fn main() {
     let planet = "Earth";
     {
         println!("planet is {planet}");
-        let mut planet = 4;
+        let planet = 4;
         println!("planet is {planet}");
     }
     println!("planet is {planet}");
@@ -560,6 +562,7 @@ fn main() {
     println!("message is {message}");
 
     let last_word = &message; //full string
+    println!("{} full string", last_word);
     let last_word = &message[15..15 + 5];
     println!("slice[15..15+5] is {last_word}");
 
@@ -633,7 +636,7 @@ fn main() {
     println!("Vehicle Name: {}", vehicle.name);
 
     header("Struct Update Syntax");
-    let mut vehicle: Shuttle = Shuttle {
+    let vehicle: Shuttle = Shuttle {
         name: String::from("Atlantis"),
         crew_size: 8,
         propellant: 1000.0,
@@ -738,8 +741,100 @@ fn main() {
     println!("hubble == gps is {}", hubble > gps);
 
     header("Trait Bounds");
+    print_type(13);
+    print_type(13.0);
+    print_type("thirteen");
+    print_type([13]);
+
+    header("Multiple Traits Bounds");
+    compare_and_print(1.0, 1);
+    compare_and_print(1.1, 1);
+
+    compare_and_print2(1.0, 1);
+    compare_and_print2(1.0, 1);
+
+    header("Return Types with Implemented");
+    println!("output is {}", get_displayable());
+
+    header("Traits Challenge: Implement the display");
+    let earth = Planet {
+        name: String::from("Earth"),
+        size: 100.0
+    };
+    println!("Planet info: {}", earth);
 
 
+    let mars = Planet {
+        name: String::from("Mars"),
+        size: 110.0
+    };
+
+    let pluto = Planet {
+        name: String::from("Pluto"),
+        size: 100.0
+    };
+    println!("Mars is bigger than earth: {}", mars > earth);
+    assert_eq!(mars > earth, true);
+    println!("Earth is less than Mars: {}", earth < mars);
+    assert_eq!(earth < mars, true);
+    println!("Pluto same size as Earth: {}", earth == pluto);
+    assert_eq!(earth == pluto, true);
+
+
+    header("Lifetimes")
+}
+
+struct Planet {
+    name: String,
+    size: f64
+}
+
+impl PartialOrd for Planet {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.size.partial_cmp(&other.size)
+    }
+}
+
+impl PartialEq for Planet {
+    fn eq(&self, other: &Self) -> bool {
+        self.size == other.size
+    }
+}
+
+impl fmt::Display for Planet {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "({},{})", self.name, self.size)
+    }
+}
+
+fn get_displayable() -> impl fmt::Display {
+    13
+}
+
+
+fn compare_and_print2<T, U>(a: T, b: U)
+    where T: fmt::Display + PartialEq + From<U>,
+          U: fmt::Display + PartialEq + Copy
+{
+    if a == T::from(b) {
+        println!("{} is equal to {}", a, b);
+    } else {
+        println!("{} is NOT equal to {}", a, b);
+    }
+}
+
+
+// Multiple Trait Bounds (long version)
+fn compare_and_print<T: fmt::Display + PartialEq + From<U>, U: fmt::Display + PartialEq + Copy>(a: T, b: U) {
+    if a == T::from(b) {
+        println!("{} is equal to {}", a, b);
+    } else {
+        println!("{} is NOT equal to {}", a, b);
+    }
+}
+
+fn print_type<T: fmt::Debug>(item: T) {
+    println!("{:?} is {:?}", item, any::type_name::<T>())
 }
 
 trait Description {
@@ -783,7 +878,7 @@ struct SpaceStation {
 }
 
 
-fn my_function<T, U>(a: T, b: U) {}
+fn my_function<T, U>(_a: T, _b: U) {}
 
 fn sum_boxes<T: Add<Output=T>>(a: Box<T>, b: Box<T>) -> Box<T> {
     Box::new(*a + *b)
