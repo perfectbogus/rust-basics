@@ -804,9 +804,61 @@ fn main() {
     result = best_fuel(&p1, &p2);
     println!("result is {}", result);
 
+    //Different Lifetimes between p1 and p2
+    // compile with error: borrowed value does not live long enough
+    // let result;
+    // let p1 = String::from("RP1");
+    // {
+    //     let p2 = String::from("LNG");
+    //     result = best_fuel(&p1, &p2); // p2 can return as result but its out scope as result
+    // }
+    // println!("result is {}", result);
+
+    // this will compile because p2 has no defined timelife in best_fuel_no_y_usage it's not been returned
+    // for this reason compiles
+    let result;
+    let p1 = String::from("RP-1");
+    let p2 = String::from("LNG");
+    result = best_fuel_no_y_usage(&p1, &p2);
+    println!("result is {}", result);
+
+    let result_second_lifetime;
+    let p1 = String::from("RP-1");
+    let p2 = String::from("LNG");
+    // Define Second lifetime for Y
+    result_second_lifetime = best_fuel_second_lifetime(&p1, &p2);
+    println!("result is {}", result_second_lifetime);
+
+    header("Lifetime Elision Rules");
+    header("Rule 1: Each input parameter that is a reference is assigned its own lifetime");
+    // fn get<'a>(x: &'a str) -> &str
+    // fn get<'a, 'b>(x: &'a str, y: &'b str) -> &str
+    // fn get<'a, 'b, 'c>(x: &'a str, y: &'b str, z: &'c) -> &str
+    header("Rule 2: if there is exactly one input lifetime, assign it to all output lifetimes");
+    // fn get<'a>(x: &'a str) -> &'a str
+    header("Rule 3: if there is a &self or &mut self input parameter, its lifetime will be assigned to all output lifetimes");
+    // fn send(&self, msg: &str) -> &str
     header("Multiple Lifetime Annotations");
 
 }
+
+fn best_fuel_second_lifetime<'a, 'b>(x: &'a str, y: &'b str) -> &'a str {
+    if x.len() > y.len() {
+        x
+    } else {
+        x
+    }
+}
+
+// Only x is used on the lifetime
+fn best_fuel_no_y_usage<'a>(x: &'a str, y: &str) -> &'a str {
+    if x.len() > y.len() {
+        x
+    } else {
+        x
+    }
+}
+
 // No Compile Error
 // fn best_fuel(x: &str, y: &str) -> &str {
 //     if x.len() > y.len() {
