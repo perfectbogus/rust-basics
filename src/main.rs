@@ -814,6 +814,7 @@ fn main() {
     // }
     // println!("result is {}", result);
 
+    header("Multiple Lifetime Annotations");
     // this will compile because p2 has no defined timelife in best_fuel_no_y_usage it's not been returned
     // for this reason compiles
     let result;
@@ -830,18 +831,56 @@ fn main() {
     println!("result is {}", result_second_lifetime);
 
     header("Lifetime Elision Rules");
-    header("Rule 1: Each input parameter that is a reference is assigned its own lifetime");
+    println!("Rule 1: Each input parameter that is a reference is assigned its own lifetime");
     // fn get<'a>(x: &'a str) -> &str
     // fn get<'a, 'b>(x: &'a str, y: &'b str) -> &str
     // fn get<'a, 'b, 'c>(x: &'a str, y: &'b str, z: &'c) -> &str
-    header("Rule 2: if there is exactly one input lifetime, assign it to all output lifetimes");
+    println!("Rule 2: if there is exactly one input lifetime, assign it to all output lifetimes");
     // fn get<'a>(x: &'a str) -> &'a str
-    header("Rule 3: if there is a &self or &mut self input parameter, its lifetime will be assigned to all output lifetimes");
+    println!("Rule 3: if there is a &self or &mut self input parameter, its lifetime will be assigned to all output lifetimes");
     // fn send(&self, msg: &str) -> &str
-    header("Multiple Lifetime Annotations");
+
+    header("Struct Lifetime Annotations");
+
+    let v = SimpleShuttle {
+        name: String::from("Endeavour")
+    };
+
+    let sender = v.send_transmission("Greetings from orbit!");
+    println!("Sender is {}", sender);
+
+    let v = LifetimeShuttle {
+        name: "Endeavour"
+    };
+    let sender = v.send_transmission("Greetings from Orbit!");
+    println!("Sender is {}", sender);
+
+    header("Static Lifetime");
+    // 'static to mark it that will live for all the program
 
 }
 
+struct LifetimeShuttle<'a> {
+    name: &'a str
+}
+
+impl<'a, 'b> LifetimeShuttle<'a> {
+    fn send_transmission(&'a self, msg: &'b str) -> &'b str {
+        println!("Transmitting message: {}", msg);
+        msg
+    }
+}
+
+struct SimpleShuttle {
+    name: String
+}
+
+impl SimpleShuttle {
+    fn send_transmission(&self, msg: &str) -> &str {
+        println!("Transmission message: {}", msg);
+        &self.name
+    }
+}
 fn best_fuel_second_lifetime<'a, 'b>(x: &'a str, y: &'b str) -> &'a str {
     if x.len() > y.len() {
         x
