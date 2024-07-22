@@ -3,7 +3,7 @@ use std::i32::MAX;
 use std::io;
 use std::ops::Add;
 use std::{any, fmt};
-use std::fmt::Formatter;
+use std::fmt::{Display, format, Formatter, write};
 
 fn main() {
     let mut x = 10;
@@ -858,6 +858,104 @@ fn main() {
     header("Static Lifetime");
     // 'static to mark it that will live for all the program
 
+
+    header("Enums");
+    println!("Simple Enums");
+    let my_shape = ShapeNoValue::Rectangle;
+    println!("Shape: {:?}", my_shape);
+
+    println!("Enums with values");
+    let my_shape = ShapeValue::Rectangle(3.3, 2.2);
+    println!("Shape: {:?}", my_shape);
+
+    println!("Match Operator");
+    let shape = ShapeValue::Circle(3.3);
+    match shape {
+        ShapeValue::Circle(r) => println!("Circle radius: {}", r),
+        ShapeValue::Rectangle(h, w) => println!("Rectangle H: {}, W: {}", h, w),
+        ShapeValue::Triangle(a, b, c) => println!("Triangle: a: {} b: {} c: {}", a, b, c)
+    }
+
+    println!("Match with default placeholder");
+    let number = 1u8;
+
+    // underscore wildcard
+    let result = match number {
+        0 => "zero",
+        1 => "one",
+        2 => "two",
+        _ => {
+            println!("{} did not match", number);
+            "something else"
+        }
+    };
+
+    println!("Enum Methods");
+    let shape = ShapeValue::Triangle(1.0, 2.0, 3.0);
+    let perimeter = shape.perimeter();
+    println!("Perimeter is {}", perimeter);
+
+
+    println!("Option<T> enum");
+    println!("Unknown");
+    let address = Location::Unknown;
+    address.display();
+    println!("Anonymous");
+    let address = Location::Anonymous;
+    address.display();
+    println!("Known");
+    let address = Location::Known(28.6, -80.60);
+    address.display();
+
+}
+
+enum Location {
+    Unknown,
+    Anonymous,
+    Known(f64, f64)
+}
+
+impl Location {
+    fn display(&self) {
+        match *self {
+            Location::Unknown => println!("Unkown Location"),
+            Location::Known(lon, lat) => println!("lon: {} and lat: {}", lon, lat),
+            Location::Anonymous => println!("Anonymous Location")
+        }
+    }
+}
+
+impl Display for Location {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Location::Known(lon, lat) => write!(f, "lon: {} and lat: {}", lon, lat),
+            _ => write!(f, "")
+        }
+    }
+}
+
+impl ShapeValue {
+    fn perimeter(&self) -> f64 {
+        match *self {
+            ShapeValue::Circle(r) => r * 2.0 * std::f64::consts::PI,
+            ShapeValue::Rectangle(w, h) => (2.0 * w) + (2.0 * h),
+            ShapeValue::Triangle(a, b, c) => a + b + c
+        }
+    }
+}
+
+#[derive(Debug)]
+enum ShapeValue {
+    Circle(f64),
+    Rectangle(f64, f64),
+    Triangle(f64, f64, f64)
+}
+
+#[derive(Debug)]
+enum ShapeNoValue {
+    Circle,
+    Rectangle,
+    Triangle
 }
 
 struct LifetimeShuttle<'a> {
