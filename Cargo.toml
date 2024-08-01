@@ -13,4 +13,4 @@ path = "src/box/main.rs"
 
 [[bin]]
 name = "linked_list"
-path = "src/linked_list/main.rs"
+path = "src/linked_list/list.rs"
