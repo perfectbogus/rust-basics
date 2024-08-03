@@ -18,24 +18,20 @@ pub struct Iter<'a, T> {
 
 impl<T> List<T> {
 
-    pub fn iter<'a>(&'a self) -> Iter<'a, T> {
-        Iter {
-            next: self.head.as_deref().map(|node| &*node)
-        }
+    pub fn iter(&self) -> Iter<T> {
+        Iter { next: self.head.as_deref() }
     }
     pub fn into_iter(self) -> IntoIter<T> {
         IntoIter(self)
     }
 
     pub fn new() -> Self {
-        List {
-            head: None
-        }
+        List { head: None }
     }
 
     pub fn push(&mut self, elem: T) {
         let new_node = Box::new(Node {
-            elem: elem,
+            elem,
             next: self.head.take()
         });
 
@@ -85,7 +81,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.next.map(|node| {
-            self.next = node.next.as_deref().map(|node| &*node );
+            self.next = node.next.as_deref();
             &node.elem
         })
     }
@@ -94,6 +90,19 @@ impl<'a, T> Iterator for Iter<'a, T> {
 #[cfg(test)]
 mod test {
     use super::List;
+
+    #[test]
+    fn iter() {
+        let mut list = List::new();
+        list.push(1);
+        list.push(2);
+        list.push(3);
+
+        let mut iter = list.into_iter();
+        assert_eq!(iter.next(), Some(&3));
+        assert_eq!(iter.next(), Some(&2));
+        assert_eq!(iter.next(), Some(&1));
+    }
 
     #[test]
     fn into_iter() {
