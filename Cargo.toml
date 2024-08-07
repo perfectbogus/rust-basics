@@ -14,3 +14,16 @@ path = "src/box/main.rs"
 [[bin]]
 name = "linked_list"
 path = "src/linked_list/list.rs"
+
+[[bin]]
+name = "design_patters_idioms_borrowed_types"
+path = "src/design_patterns/idioms/2_1_borrowed_types/main.rs"
+
+[[bin]]
+name = "desing_patterns_idioms_contatenating"
+path = "src/design_patterns/idioms/2_2_Contatenating_strings_with_format/main.rs"
+
+[[bin]]
+name = "desing_patterns_idioms_contructor"
+path = "src/design_patterns/idioms/2_3_constructor/main.rs"
+
