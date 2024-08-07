@@ -27,3 +27,11 @@ path = "src/design_patterns/idioms/2_2_Contatenating_strings_with_format/main.rs
 name = "desing_patterns_idioms_contructor"
 path = "src/design_patterns/idioms/2_3_constructor/main.rs"
 
+[[bin]]
+name = "desing_patterns_idioms_default"
+path = "src/design_patterns/idioms/2_4_default/main.rs"
+
+
+[[bin]]
+name = "desing_patterns_idioms_collections"
+path = "src/design_patterns/idioms/2_5_collections_are_smart_pointers/main.rs"
