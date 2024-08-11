@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 ferris-says = "0.3.1"
+cursive = "0.21.1"
 
 [[bin]]
 name = "box"
@@ -31,7 +32,14 @@ path = "src/design_patterns/idioms/2_3_constructor/main.rs"
 name = "desing_patterns_idioms_default"
 path = "src/design_patterns/idioms/2_4_default/main.rs"
 
-
 [[bin]]
 name = "desing_patterns_idioms_collections"
 path = "src/design_patterns/idioms/2_5_collections_are_smart_pointers/main.rs"
+
+[[bin]]
+name = "desing_patterns_behavioural_command_rust_book"
+path = "src/design_patterns/design_patterns/behavioural/command_rust_book/main.rs"
+
+[[bin]]
+name = "desing_patterns_behavioural_command_refactoring_guru"
+path = "src/design_patterns/design_patterns/behavioural/command_guru/main.rs"
