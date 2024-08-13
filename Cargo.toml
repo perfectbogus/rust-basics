@@ -38,8 +38,18 @@ path = "src/design_patterns/idioms/2_5_collections_are_smart_pointers/main.rs"
 
 [[bin]]
 name = "desing_patterns_behavioural_command_rust_book"
-path = "src/design_patterns/design_patterns/behavioural/command_rust_book/main.rs"
+path = "src/design_patterns/design_patterns/behavioural/command/trait_object/main.rs"
 
 [[bin]]
 name = "desing_patterns_behavioural_command_refactoring_guru"
-path = "src/design_patterns/design_patterns/behavioural/command_guru/main.rs"
+path = "src/design_patterns/design_patterns/behavioural/command/command_guru/main.rs"
+
+[[bin]]
+name = "desing_patterns_behavioural_command_function_pointer"
+path = "src/design_patterns/design_patterns/behavioural/command/function_pointer/main.rs"
+
+[[bin]]
+name = "desing_patterns_behavioural_command_function_trait_boject"
+path = "src/design_patterns/design_patterns/behavioural/command/function_trait_object/main.rs"
+
+
