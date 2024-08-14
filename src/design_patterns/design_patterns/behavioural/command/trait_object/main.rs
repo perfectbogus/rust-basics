@@ -70,11 +70,11 @@ impl Schema {
 fn main() {
     let mut schema = Schema::new();
 
-    let cmd = Box::new(CreateTable);
+    let cmd = Box::new(CreateTable {} );
     schema.add_migration(cmd);
-    let cmd = Box::new(AddField);
+    let cmd = Box::new(AddField {} );
     schema.add_migration(cmd);
-    let cmd = Box::new(CreateIndex);
+    let cmd = Box::new(CreateIndex {} );
     schema.add_migration(cmd);
 
     let result = schema.execute();

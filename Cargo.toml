@@ -52,4 +52,7 @@ path = "src/design_patterns/design_patterns/behavioural/command/function_pointer
 name = "desing_patterns_behavioural_command_function_trait_boject"
 path = "src/design_patterns/design_patterns/behavioural/command/function_trait_object/main.rs"
 
+[[bin]]
+name = "desing_patterns_behavioural_interpreter"
+path = "src/design_patterns/design_patterns/behavioural/interpreter/main.rs"
 
