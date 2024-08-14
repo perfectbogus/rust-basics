@@ -61,5 +61,9 @@ name = "desing_patterns_behavioural_new_type"
 path = "src/design_patterns/design_patterns/behavioural/new_type/main.rs"
 
 [[bin]]
-name = "desing_patterns_behavioural_strategy"
-path = "src/design_patterns/design_patterns/behavioural/strategy/main.rs"
+name = "desing_patterns_behavioural_strategy_trait"
+path = "src/design_patterns/design_patterns/behavioural/strategy/trait/main.rs"
+
+[[bin]]
+name = "desing_patterns_behavioural_strategy_closure"
+path = "src/design_patterns/design_patterns/behavioural/strategy/closure/main.rs"
