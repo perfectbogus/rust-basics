@@ -56,3 +56,6 @@ path = "src/design_patterns/design_patterns/behavioural/command/function_trait_o
 name = "desing_patterns_behavioural_interpreter"
 path = "src/design_patterns/design_patterns/behavioural/interpreter/main.rs"
 
+[[bin]]
+name = "desing_patterns_behavioural_new_type"
+path = "src/design_patterns/design_patterns/behavioural/new_type/main.rs"
