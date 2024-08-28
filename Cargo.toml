@@ -67,3 +67,11 @@ path = "src/design_patterns/design_patterns/behavioural/strategy/trait/main.rs"
 [[bin]]
 name = "desing_patterns_behavioural_strategy_closure"
 path = "src/design_patterns/design_patterns/behavioural/strategy/closure/main.rs"
+
+[[bin]]
+name = "desing_patterns_behavioural_visitor_guru_shape_example"
+path = "src/design_patterns/design_patterns/behavioural/visitor/guru_shape_example/main.rs"
+
+[[bin]]
+name = "desing_patterns_behavioural_visitor_book_example"
+path = "src/design_patterns/design_patterns/behavioural/visitor/book_example/main.rs"
