@@ -38,6 +38,7 @@ impl Shape for Circle {
     }
 
     fn accept<V: Visitor>(&self, v: &V) {
+        v.visit_circle(self);
         println!("circle accept");
     }
 }
@@ -67,8 +68,14 @@ impl Visitor for XMLExportVisitor {
 
 
 fn main() {
-    let mut shapes  = Vec::new();
-    shapes.push(Circle {});
-    shapes.push(Dot {});
+    let mut shapes: Vec<Box<dyn Shape>> = Vec::new();
+    shapes.push(Box::new(Circle {}));
+    shapes.push(Box::new(Dot {}));
+
+    let xml_export_visitor = XMLExportVisitor {};
+
+    for e in shapes.iter() {
+        e.draw();
+    }
 
 }
