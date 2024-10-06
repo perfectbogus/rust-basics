@@ -75,3 +75,7 @@ path = "src/design_patterns/design_patterns/behavioural/visitor/guru_shape_examp
 [[bin]]
 name = "desing_patterns_behavioural_visitor_book_example"
 path = "src/design_patterns/design_patterns/behavioural/visitor/book_example/main.rs"
+
+[[bin]]
+name = "minigrep"
+path = "src/minigrep/main.rs"
