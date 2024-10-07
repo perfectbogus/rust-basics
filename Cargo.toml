@@ -79,3 +79,7 @@ path = "src/design_patterns/design_patterns/behavioural/visitor/book_example/mai
 [[bin]]
 name = "minigrep"
 path = "src/minigrep/main.rs"
+
+[[bin]]
+name = "functional_language"
+path = "functional_language/src/main.rs"
