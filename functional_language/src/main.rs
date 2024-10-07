@@ -106,10 +106,68 @@ fn main() {
     });
     println!("{list:#?}, sorted in {num_sort_operations} operations");
 
+    // Processing a series of items with iterators
+    header("Processing a series of items with iterators");
+    let v1 = vec![1, 2, 3];
+
+    for val in v1.iter() {
+        println!("Got {val}");
+    }
+
+    header("Methods that consume the iterator");
+    let v1 = vec![1, 2, 3];
+    let v1_iter = v1.iter();
+    let total: i32 = v1_iter.sum();
+    println!("Total: {}", total);
+
+    header("Methods that produce other Iterators");
+    let v1: Vec<i32> = vec![1, 2, 3];
+    let v2: Vec<_> = v1.iter().map(|x| x + 1).collect();
+    for data in v2 {
+        println!("data: {}", data);
+    }
+
+    header("Using Closures that capture their environment");
+    let shoes = vec![
+        Shoe {
+            size: 10,
+            style: String::from("sneaker"),
+        },
+        Shoe {
+            size: 13,
+            style: String::from("sandal"),
+        },
+        Shoe {
+            size: 10,
+            style: String::from("boot"),
+        },
+    ];
+    let in_my_size = shoes_in_size(shoes, 10);
+    println!("in my size: {:?}", in_my_size);
+
+
 }
+
+#[derive(PartialEq, Debug)]
+struct Shoe {
+    size: u32,
+    style: String,
+}
+
+fn shoes_in_size(shoes: Vec<Shoe>, shoe_size: u32) -> Vec<Shoe> {
+    shoes.into_iter().filter(|s| s.size == shoe_size).collect()
+}
+
 
 #[derive(Debug)]
 struct Rectangle {
     width: u32,
     height: u32,
+}
+
+fn header(str: &str) {
+    println!();
+    println!("#####");
+    println!("##### {} #####", str);
+    println!("#####");
 }
