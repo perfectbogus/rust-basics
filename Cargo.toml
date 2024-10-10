@@ -1,85 +1,16 @@
-[package]
-name = "hello-rust"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+resolver = "2"
 
-[dependencies]
-ferris-says = "0.3.1"
-cursive = "0.21.1"
+members = [
+    "functional_language",
+    "input_output_challenge",
+    "module_challenge",
+    "smart_pointers",
+    "design_patterns/behavioural/command/command_guru",
+    "design_patterns/behavioural/command/function_pointer",
+    "design_patterns/behavioural/command/function_trait_object",
+    "design_patterns/behavioural/command/trait_object",
 
-[[bin]]
-name = "box"
-path = "src/box/main.rs"
+]
 
 
-[[bin]]
-name = "linked_list"
-path = "src/linked_list/list.rs"
-
-[[bin]]
-name = "design_patters_idioms_borrowed_types"
-path = "src/design_patterns/idioms/2_1_borrowed_types/main.rs"
-
-[[bin]]
-name = "desing_patterns_idioms_contatenating"
-path = "src/design_patterns/idioms/2_2_Contatenating_strings_with_format/main.rs"
-
-[[bin]]
-name = "desing_patterns_idioms_contructor"
-path = "src/design_patterns/idioms/2_3_constructor/main.rs"
-
-[[bin]]
-name = "desing_patterns_idioms_default"
-path = "src/design_patterns/idioms/2_4_default/main.rs"
-
-[[bin]]
-name = "desing_patterns_idioms_collections"
-path = "src/design_patterns/idioms/2_5_collections_are_smart_pointers/main.rs"
-
-[[bin]]
-name = "desing_patterns_behavioural_command_rust_book"
-path = "src/design_patterns/design_patterns/behavioural/command/trait_object/main.rs"
-
-[[bin]]
-name = "desing_patterns_behavioural_command_refactoring_guru"
-path = "src/design_patterns/design_patterns/behavioural/command/command_guru/main.rs"
-
-[[bin]]
-name = "desing_patterns_behavioural_command_function_pointer"
-path = "src/design_patterns/design_patterns/behavioural/command/function_pointer/main.rs"
-
-[[bin]]
-name = "desing_patterns_behavioural_command_function_trait_boject"
-path = "src/design_patterns/design_patterns/behavioural/command/function_trait_object/main.rs"
-
-[[bin]]
-name = "desing_patterns_behavioural_interpreter"
-path = "src/design_patterns/design_patterns/behavioural/interpreter/main.rs"
-
-[[bin]]
-name = "desing_patterns_behavioural_new_type"
-path = "src/design_patterns/design_patterns/behavioural/new_type/main.rs"
-
-[[bin]]
-name = "desing_patterns_behavioural_strategy_trait"
-path = "src/design_patterns/design_patterns/behavioural/strategy/trait/main.rs"
-
-[[bin]]
-name = "desing_patterns_behavioural_strategy_closure"
-path = "src/design_patterns/design_patterns/behavioural/strategy/closure/main.rs"
-
-[[bin]]
-name = "desing_patterns_behavioural_visitor_guru_shape_example"
-path = "src/design_patterns/design_patterns/behavioural/visitor/guru_shape_example/main.rs"
-
-[[bin]]
-name = "desing_patterns_behavioural_visitor_book_example"
-path = "src/design_patterns/design_patterns/behavioural/visitor/book_example/main.rs"
-
-[[bin]]
-name = "minigrep"
-path = "src/minigrep/main.rs"
-
-[[bin]]
-name = "functional_language"
-path = "functional_language/src/main.rs"
