@@ -82,3 +82,7 @@ mod test {
     }
 
 }
+
+fn main() {
+
+}

@@ -21,7 +21,9 @@ members = [
     "idioms/constructor",
     "idioms/default",
     "idioms/collections_smart_pointers",
-
+    "idioms/memory",
+    "dsa/linked_list/linked_list_basic",
+    "dsa/linked_list/bad_singly_linked",
+    "dsa/linked_list/ok_singly_linked",
+    "basics",
 ]
-
-
