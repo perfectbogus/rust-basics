@@ -5,7 +5,7 @@ members = [
     "functional_language",
     "input_output_challenge",
     "module_challenge",
-    "smart_pointers",
+    "box_smart_pointers",
     "design_patterns/behavioural/command/command_guru",
     "design_patterns/behavioural/command/function_pointer",
     "design_patterns/behavioural/command/function_trait_object",
@@ -25,5 +25,5 @@ members = [
     "dsa/linked_list/linked_list_basic",
     "dsa/linked_list/bad_singly_linked",
     "dsa/linked_list/ok_singly_linked",
-    "basics",
+    "basics", "smart_pointers",
 ]
