@@ -1,4 +1,7 @@
+use std::cell::RefCell;
 use std::ops::Deref;
+use std::rc::Rc;
+use crate::List::{Cons, Nil};
 
 fn main() {
     let b = Box::new(5);
@@ -27,6 +30,28 @@ fn main() {
     hello("Rust");
     let m = MyBox(String::from("Rust"));
     hello(&m);
+
+    header("having multiple owners of mutable data by combining Rc<T> and RefCell<T>");
+
+    let value = Rc::new(RefCell::new(5));
+
+    let a = Rc::new(Cons(Rc::clone(&value), Rc::new(Nil)));
+
+    let b = Cons(Rc::new(RefCell::new(3)), Rc::clone(&a));
+    let c = Cons(Rc::new(RefCell::new(4)), Rc::clone(&a));
+
+    *value.borrow_mut() += 10;
+
+    println!("a after = {a:?}");
+    println!("b after = {b:?}");
+    println!("c after = {c:?}");
+
+}
+
+#[derive(Debug)]
+enum List {
+    Cons(Rc<RefCell<i32>>, Rc<List>),
+    Nil,
 }
 
 fn hello(name: &str) {
