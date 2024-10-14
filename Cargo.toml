@@ -25,5 +25,5 @@ members = [
     "dsa/linked_list/linked_list_basic",
     "dsa/linked_list/bad_singly_linked",
     "dsa/linked_list/ok_singly_linked",
-    "basics", "smart_pointers",
+    "basics", "smart_pointers", "cycle_memory_leak",
 ]
