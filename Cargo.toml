@@ -29,5 +29,5 @@ members = [
     "smart_pointers",
     "cycle_memory_leak",
     "challenges/recursive_dsa_with_box",
-    "challenges/inventory_management_system",
+    "challenges/inventory_management_system", "challenges/expression_evaluator", "challenges/simple_commando_parser",
 ]
