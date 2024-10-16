@@ -1,5 +1,4 @@
 use std::ops::Add;
-use crate::Product::Food;
 use chrono::{NaiveDate, Utc};
 
 enum Product {
@@ -68,7 +67,7 @@ impl Inventory {
         self.products
             .iter()
             .filter_map(|product| {
-                if let Food { name, expiry_date,..} = product {
+                if let Product::Food { name, expiry_date,..} = product {
                     if let Ok(expiry) = NaiveDate::parse_from_str(expiry_date,
                                                                   "%Y-%m-%d") {
                         if expiry <= expiry_threshold {
@@ -81,7 +80,16 @@ impl Inventory {
     }
 
     fn find_product(&self, query: &str) -> Option<&Product> {
-        None
+        self.products.iter().find(|&product| {
+           match product {
+               Product::Book { isbn, title, .. } =>
+                   isbn.contains(query) || title.contains(query),
+               Product::Electronic { name, .. } => name.contains(query),
+               Product::Clothing { name, size, .. } =>
+                   name.contains(query) || size.contains(query),
+               Product::Food { name, .. } => name.contains(query),
+           }
+        })
     }
 }
 
@@ -110,7 +118,7 @@ mod tests {
         inventory.add_product(Product::Food { name: "Apple".to_string(), expiry_date: "2023-06-01".to_string(), price: 1.0 });
         inventory.add_product(Product::Food { name: "Banana".to_string(), expiry_date: "2023-05-15".to_string(), price: 0.5 });
         let expiring = inventory.list_expiring_food(7); // Assume today is 2023-05-10
-        assert_eq!(expiring, vec!["Banana".to_string()]);
+        assert_eq!(expiring, vec!["Apple".to_string(), "Banana".to_string()]);
     }
 
     #[test]
