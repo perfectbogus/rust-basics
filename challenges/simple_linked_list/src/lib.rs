@@ -27,15 +27,30 @@ impl<T: Debug> LinkedList<T> {
     }
 
     fn pop_front(&mut self) -> Option<T> {
-        unimplemented!()
+        self.head.take().map(|node| {
+            self.head = node.next;
+            node.value
+        })
     }
 
     fn len(&self) -> usize {
-        unimplemented!()
+        let mut count: usize = 0;
+        let mut current = &self.head;
+        while let Some(node) = current {
+            count += 1;
+            current = &node.next;
+        }
+        count
     }
 
     fn to_vec(&self) -> Vec<&T> {
-        unimplemented!()
+        let mut vec = Vec::new();
+        let mut current = &self.head;
+        while let Some(node) = current {
+            vec.push(&node.value);
+            current = &node.next;
+        }
+        vec
     }
 }
 
