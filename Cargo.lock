@@ -243,6 +243,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "custom_vector_queue"
+version = "0.1.0"
+
+[[package]]
 name = "cycle_memory_leak"
 version = "0.1.0"
 
@@ -453,6 +457,10 @@ name = "libc"
 version = "0.2.159"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "561d97a539a36e26a9a5fad1ea11a3039a67714694aaa379433e580854bc3dc5"
+
+[[package]]
+name = "library_management_system"
+version = "0.1.0"
 
 [[package]]
 name = "linked_list"
@@ -769,6 +777,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
+name = "shopping_list_manager"
+version = "0.1.0"
+
+[[package]]
 name = "signal-hook"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -835,6 +847,14 @@ name = "strategy_trait"
 version = "0.1.0"
 
 [[package]]
+name = "student_analytics_system"
+version = "0.1.0"
+
+[[package]]
+name = "student_grade_tracker"
+version = "0.1.0"
+
+[[package]]
 name = "syn"
 version = "2.0.72"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -844,6 +864,10 @@ dependencies = [
  "quote",
  "unicode-ident",
 ]
+
+[[package]]
+name = "task_management_system"
+version = "0.1.0"
 
 [[package]]
 name = "time"

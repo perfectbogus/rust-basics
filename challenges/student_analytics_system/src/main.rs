@@ -22,7 +22,8 @@ impl Student {
         if self.grades.len() == 0 {
             None
         } else {
-            Some(self.grades.iter().sum() / self.grades.len())
+            let sum = self.grades.iter().sum::<u32>();
+            Some(sum as f64 / self.grades.len() as f64)
         }
     }
 }
@@ -42,13 +43,13 @@ impl StudentAnalytics {
 
     fn get_honors_students(&self) -> Vec<&Student> {
         self.students.iter()
-            .filter(|&s| *s.average_grade() >= 90.0)
+            .filter(|&s| s.average_grade().unwrap_or(0.0) >= 90.0)  // Could handle None case
             .collect()
     }
 
     fn get_students_by_major(&self, major: &str) -> Vec<&Student> {
         self.students.iter()
-            .filter(|&s| *s.major.eq(major))
+            .filter(|&s| s.major.eq(major))
             .collect()
     }
 
@@ -84,7 +85,28 @@ impl StudentAnalytics {
         // TODO: Find the top student (highest average grade) for each major
         // Return vector of (major, student) tuples
         // Use iterator methods
-        unimplemented!()
+        self.students
+            .iter()
+            // Group by major (using fold with HashMap)
+            .fold(HashMap::new(), |mut acc, student| {
+                acc.entry(student.major.as_str())
+                    .and_modify(|students: &mut Vec<&Student>| students.push(student))
+                    .or_insert(vec![student]);
+                acc
+            })
+            // For each major, find student with highest grade
+            .into_iter()
+            .filter_map(|(major, students)| {
+                students
+                    .into_iter()
+                    .max_by(|a, b| {
+                        a.average_grade()
+                            .partial_cmp(&b.average_grade())
+                            .unwrap_or(std::cmp::Ordering::Equal)
+                    })
+                    .map(|student| (major, student))
+            })
+            .collect()
     }
 }
 
