@@ -1,3 +1,4 @@
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
@@ -26,38 +27,55 @@ impl GameStore {
     //Insert using different methods
     fn add_game_simple(&mut self, game: Game) -> Option<Game> {
         //TODO: Use simple insert method
-        unimplemented!()
+        self.inventory.insert(game.title.clone(), game)
     }
 
     fn add_game_entry(&mut self, game: Game) -> &mut Game{
         //TODO: Use entry API to insert and return mutable reference
-        unimplemented!()
+        self.inventory.entry(game.title.clone()).or_insert(game)
     }
 
     fn add_or_update_stock(&mut self, title: &str, quantity: u32) -> Result<u32, String> {
         // TODO: Use entry API to add game or update stock if exists
         // Return new stock quantity
-        unimplemented!()
+        match self.inventory.entry(title.to_string()) {
+            Entry::Occupied(mut entry) => {
+                entry.get_mut().stock += quantity;
+                Ok(entry.get().stock)
+            },
+            Entry::Vacant(_) => {
+                Err("Game not found".to_string())
+            }
+        }
     }
 
     fn get_game_simple(&self, title: &str) -> Option<&Game>{
         // TODO: Use simple get method
-        unimplemented!()
+        self.inventory.get(title)
     }
 
     fn get_game_or_default(&self, title: &str) -> Game {
         // TODO: Return the game or a default game with "Not Found" title
-        unimplemented!()
+        self.inventory
+            .get(title)
+            .cloned()
+            .unwrap_or_else(||
+                Game::new("Not Found".to_string(), "Not Found".to_string(), 0.0))
     }
 
     fn get_price_if_in_stock(&self, title: &str) -> Option<f64> {
         // TODO: Return price only if game exists and has stock
-        unimplemented!()
+        self.inventory
+            .get(title)
+            .filter(|game| game.stock > 0)
+            .map(|game| game.price)
     }
 
     fn try_get_mut(&mut self, title: &str) -> Result<&mut Game, String> {
         // TODO: Try to get mutable reference or return error
-        unimplemented!()
+        self.inventory
+            .get_mut(title)
+            .ok_or_else(|| "Not Found".to_string())
     }
 
 }
