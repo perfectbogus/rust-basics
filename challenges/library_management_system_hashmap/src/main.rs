@@ -1,3 +1,4 @@
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
@@ -36,19 +37,58 @@ impl Book {
 impl Library {
     fn new() -> Self {
         // TODO: Initialize empty library
-        unimplemented!()
+        Self {
+            books_by_isbn: HashMap::new(),
+            books_by_title: HashMap::new(),
+            books_by_author: HashMap::new(),
+            borrowed_books: HashMap::new(),
+        }
     }
 
     fn add_book(&mut self, book: Book) -> Result<(), String> {
         // TODO: Add book to all indices
         // If ISBN exists, update copies instead of adding new book
-        unimplemented!()
+        match self.books_by_isbn.entry(book.isbn.clone()) {
+            Entry::Occupied(mut entry) => {
+                let existing_book = entry.get_mut();
+                existing_book.total_copies += book.total_copies;
+                existing_book.available_copies += book.available_copies;
+            }
+            Entry::Vacant(entry) => {
+                self.books_by_title.insert(book.title.clone(), book.isbn.clone());
+
+                self.books_by_author
+                    .entry(book.author.clone())
+                    .or_default()
+                    .push(book.isbn.clone());
+
+                entry.insert(book);
+            }
+        }
+        Ok(())
     }
 
     fn remove_book(&mut self, isbn: &str) -> Result<Book, String> {
         // TODO: Remove book from all indices
         // Error if book is currently borrowed
-        unimplemented!()
+        if self.borrowed_books.values().any(|books| books.contains(&isbn.to_string())) {
+            return Err("Cannot remove book: currently borrowed".to_string());
+        }
+
+        let book = self.books_by_isbn
+            .remove(isbn)
+            .ok_or_else(|| "Book does not exist".to_string())?;
+
+        self.books_by_title.remove(&book.title);
+
+        if let Some(author_books) = self.books_by_author.get_mut(&book.author) {
+            author_books.retain(|book_isbn| book_isbn != isbn);
+            if author_books.is_empty() {
+                self.books_by_author.remove(&book.author);
+            }
+        }
+
+        Ok(book)
     }
 
     fn get_by_isbn(&self, isbn: &str) -> Option<&Book> {
