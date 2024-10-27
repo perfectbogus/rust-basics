@@ -93,17 +93,22 @@ impl Library {
 
     fn get_by_isbn(&self, isbn: &str) -> Option<&Book> {
         // TODO: Retrieve book by ISBN
-        unimplemented!()
+        self.books_by_isbn.get(isbn)
     }
 
     fn find_by_title(&self, title: &str) -> Option<&Book> {
         // TODO: Find book by title
-        unimplemented!()
+        self.books_by_title.get(title).and_then(|isbn| self.books_by_isbn.get(isbn))
     }
 
     fn find_by_author(&self, author: &str) -> Vec<&Book> {
         // TODO: Find all books by author
-        unimplemented!()
+        self.books_by_author
+            .get(author)
+            .iter()
+            .flat_map(|isbns| isbns.iter())
+            .filter_map(|isbn| self.books_by_isbn.get(isbn))
+            .collect()
     }
 
     fn borrow_book(&mut self, user: &str, isbn: &str) -> Result<(), String> {
