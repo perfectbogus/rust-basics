@@ -116,7 +116,21 @@ impl Library {
         // Check if book exists and is available
         // Update available copies
         // Update borrowed_books
-        unimplemented!()
+        if let Some(book) = self.books_by_isbn.get_mut(isbn) {
+            if book.available_copies > 0 {
+                book.available_copies -= 1;
+                self.borrowed_books
+                    .entry(user.to_string())
+                    .or_default()
+                    .push(isbn.to_string());
+
+                Ok(())
+            } else {
+                Err("No copies available".to_string())
+            }
+        } else {
+            Err("Book does not exists".to_string())
+        }
     }
 
     fn return_book(&mut self, user: &str, isbn: &str) -> Result<(), String> {
@@ -124,7 +138,25 @@ impl Library {
         // Check if user actually borrowed the book
         // Update available copies
         // Update borrowed_books
-        unimplemented!()
+        if !self.borrowed_books
+            .get(user)
+            .map_or(false, |books| books.contains(&isbn.to_string())) {
+            return Err("User has not borrowed this book".to_string())
+        }
+
+        if let Some(borrowed_books) = self.borrowed_books.get_mut(user) {
+            borrowed_books.retain(|borrowed_isbn| borrowed_isbn != isbn);
+            if borrowed_books.is_empty() {
+                self.borrowed_books.remove(user);
+            }
+        }
+
+        if let Some(book) = self.books_by_isbn.get_mut(isbn) {
+            book.available_copies += 1;
+            Ok(())
+        } else {
+            Err("Book does not exist".to_string())
+        }
     }
 
     fn get_available_books(&self) -> Vec<&Book> {
