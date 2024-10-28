@@ -1,6 +1,5 @@
 use std::cmp::Ordering;
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Clone)]
 struct Movie {
@@ -107,13 +106,70 @@ impl MovieSystem {
         // 1. Movies they haven't rated
         // 2. From genres they've rated highly (4 or 5)
         // 3. Sorted by rating
-        unimplemented!()
+        let preferred_genres = self.user_ratings
+            .get(user)
+            .map(|ratings| {
+                ratings.iter()
+                    .filter(|(movie_id, &rating)| rating >= 4 )
+                    .filter_map(|(movie_id, _)| self.movies.get(movie_id))
+                    .flat_map(|movie| &movie.genres)
+                    .collect::<HashSet<_>>()
+            })
+            .unwrap_or_default();
+
+        let mut recommendations: Vec<&Movie> = self.movies
+            .values()
+            .filter(|movie| {
+                !self.user_ratings
+                    .get(user)
+                    .map_or(false, |ratings| ratings.contains_key(&movie.id))
+            })
+            .filter(|movie| {
+                movie.genres.iter().any(|genre| preferred_genres.contains(genre))
+            })
+            .collect();
+
+        recommendations.sort_by(|a,b| {
+            b.rating
+                .partial_cmp(&a.rating)
+                .unwrap_or(Ordering::Equal)
+        });
+
+        recommendations
     }
 
     fn get_similar_movies(&self, movie_id: u32) -> Result<Vec<&Movie>, String> {
         // TODO: Return movies that share genres with the given movie
         // Sort by number of shared genres and then by rating
-        unimplemented!()
+        //get movie
+        let target_movie = self.movies
+            .get(&movie_id)
+            .ok_or("Movie not found".to_string())?;
+
+        let mut similar_movies: Vec<&Movie> = self.movies.values()
+            .filter(|movie| movie.id != movie_id)
+            .collect();
+
+        similar_movies.sort_by(|a, b| {
+            let a_shared = a.genres.iter()
+                .filter(|genre| target_movie.genres.contains(genre))
+                .count();
+            let b_shared = b.genres.iter()
+                .filter(|genre| target_movie.genres.contains(genre))
+                .count();
+
+            b_shared.cmp(&a_shared)
+                .then(b.rating.partial_cmp(&a.rating)
+                    .unwrap_or(Ordering::Equal))
+        });
+
+
+        similar_movies.retain(|movie| {
+            movie.genres.iter()
+                .any(|genre| target_movie.genres.contains(genre))
+        });
+
+        Ok(similar_movies)
     }
 
     fn get_top_movies_by_year(&self, year: u32, limit: usize) -> Vec<&Movie> {
