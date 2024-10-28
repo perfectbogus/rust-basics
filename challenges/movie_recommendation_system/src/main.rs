@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
@@ -88,7 +89,17 @@ impl MovieSystem {
 
     fn get_movies_by_genre(&self, genre: &str) -> Vec<&Movie> {
         // TODO: Return all movies of a specific genre, sorted by rating
-        unimplemented!()
+        self.genre_index
+            .get(genre)
+            .map_or(Vec::new(), |movies_by_genre| {
+                let mut movies: Vec<&Movie> = movies_by_genre
+                    .iter()
+                    .filter_map(|movie_id| self.movies.get(movie_id))
+                    .collect();
+
+                movies.sort_by(|a, b| b.rating.partial_cmp(&a.rating).unwrap_or(Ordering::Equal));
+                movies
+            })
     }
 
     fn get_user_recommendations(&self, user: &str) -> Vec<&Movie> {
