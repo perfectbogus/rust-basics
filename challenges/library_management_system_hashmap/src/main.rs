@@ -161,13 +161,22 @@ impl Library {
 
     fn get_available_books(&self) -> Vec<&Book> {
         // TODO: Get all books with available copies
-        unimplemented!()
+        self.books_by_isbn.iter()
+            .map(|(_, book)| book )
+            .filter(| book | book.available_copies > 0)
+            .collect()
     }
 
     fn get_user_borrowed_books(&self, user: &str) -> Vec<&Book> {
         // TODO: Get all books borrowed by user
-        unimplemented!()
+        self.borrowed_books.get(user)
+            .iter()
+            .flat_map(|isbns| isbns.iter())
+            .filter_map(|isbn| self.books_by_isbn.get(isbn))
+            .collect()
     }
+
+
 }
 
 #[cfg(test)]
