@@ -1,3 +1,4 @@
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
@@ -12,8 +13,8 @@ struct Movie {
 #[derive(Debug)]
 struct MovieSystem {
     movies: HashMap<u32, Movie>,
-    user_ratings: HashMap<String, HashMap<u32, u8>>,
-    genre_index: HashMap<String, Vec<u32>>,
+    user_ratings: HashMap<String, HashMap<u32, u8>>,  // user -> (movie_id -> rating)
+    genre_index: HashMap<String, Vec<u32>>,  // genre -> movie_ids
 }
 
 impl Movie {
@@ -31,20 +32,58 @@ impl Movie {
 impl MovieSystem {
     fn new() -> Self {
         // TODO: Initialize empty system
-        unimplemented!()
+        Self { movies: HashMap::new(), user_ratings: HashMap::new(), genre_index: HashMap::new() }
     }
 
     fn add_movie(&mut self, movie: Movie) -> Result<(), String> {
         // TODO: Add movie to system and update genre index
         // Return error if movie ID already exists
-        unimplemented!()
+        if self.movies.contains_key(&movie.id) {
+           return Err("Movie ID already exists".to_string());
+        }
+
+        movie.genres.iter()
+            .for_each(|genre| {
+                self.genre_index
+                    .entry(genre.clone())
+                    .or_default()
+                    .push(movie.id)
+            });
+
+        self.movies.insert(movie.id, movie);
+        Ok(())
     }
 
     fn add_user_rating(&mut self, user: &str, movie_id: u32, rating: u8) -> Result<(), String> {
         // TODO: Add or update user's rating for a movie
         // Rating should be between 1 and 5
         // Update movie's average rating
-        unimplemented!()
+        if rating < 1 || rating > 5 {
+            return Err("Rating must be between 1 and 5".to_string());
+        }
+
+        if !self.movies.contains_key(&movie_id) {
+            return Err("Movie does not exit".to_string());
+        }
+
+        self.user_ratings
+            .entry(user.to_string())
+            .or_default()
+            .insert(movie_id, rating);
+
+        if let Some(movie) = self.movies.get_mut(&movie_id) {
+            let ratings : Vec<u8> = self.user_ratings
+                .values()
+                .filter_map(|ratings| ratings.get(&movie_id))
+                .copied()
+                .collect();
+
+            movie.rating = ratings.iter()
+                .map(|&r| r as f64)
+                .sum::<f64>() / ratings.len() as f64;
+        }
+
+        Ok(())
     }
 
     fn get_movies_by_genre(&self, genre: &str) -> Vec<&Movie> {
