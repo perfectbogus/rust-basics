@@ -1,3 +1,5 @@
+use std::iter::zip;
+
 #[derive(Debug, Clone)]
 struct Student {
     name: String,
@@ -33,13 +35,21 @@ impl Student {
 
     fn average_grade(&self) -> Option<f32> {
         // TODO: Calculate average grade using iterator methods
-        unimplemented!()
+        self.grades
+            .iter()
+            .map(|&x| x )
+            .reduce(|a, b| a + b )
+            .map(|sum| sum / self.grades.len() as f32)
     }
 
     fn failing_subjects(&self) -> Vec<&String> {
         // TODO: Return subjects where grade is less than 60
         // Use zip to pair grades with subjects
-        unimplemented!()
+        self.subjects.iter()
+            .zip(self.grades.iter())
+            .filter(|(_, &grade)| grade < 60.0)
+            .map(|(subject, _)| subject)
+            .collect()
     }
 }
 
