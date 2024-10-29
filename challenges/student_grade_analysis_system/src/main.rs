@@ -56,24 +56,42 @@ impl Student {
 impl GradeAnalyzer {
     fn new() -> Self {
         // TODO: Initialize with empty students vector
-        unimplemented!()
+        Self { students: Vec::new() }
     }
 
     fn add_student(&mut self, student: Student) {
         // TODO: Add student to vector
-        unimplemented!()
+        self.students.push(student);
     }
 
     fn get_top_students(&self) -> Vec<&Student> {
         // TODO: Return students with average grade >= 90
         // Use iterator methods
-        unimplemented!()
+        self.students.iter()
+            .filter(|student| {
+                student.average_grade()
+                    .map_or(false, |grade| grade >= 90.0)
+            })
+            .collect()
     }
 
     fn get_subject_average(&self, subject: &str) -> Option<f32> {
         // TODO: Calculate average grade for a specific subject across all students
         // Use iterator methods
-        unimplemented!()
+        let grades: Vec<f32> = self.students.iter()
+            .filter_map(|student| {
+                student.subjects.iter()
+                    .zip(student.grades.iter())
+                    .find(|(s, _)| *s == subject)
+                    .map(|(_, &grade)| grade)
+            })
+            .collect();
+
+        grades.iter()
+            .copied()
+            .reduce(|a, b| a + b)
+            .map(|sum| sum / grades.len() as f32)
+
     }
 
     fn get_grade_distribution(&self) -> Vec<(String, usize)> {
