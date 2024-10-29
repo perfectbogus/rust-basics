@@ -175,7 +175,16 @@ impl MovieSystem {
     fn get_top_movies_by_year(&self, year: u32, limit: usize) -> Vec<&Movie> {
         // TODO: Return top rated movies for a specific year
         // Limited to 'limit' number of results
-        unimplemented!()
+        let mut movies_by_year: Vec<&Movie> = self.movies.values()
+            .filter(|movie| movie.year == year)
+            .collect();
+
+        movies_by_year.sort_by(|a, b| {
+           b.rating.partial_cmp(&a.rating)
+               .unwrap_or(Ordering::Equal)
+        });
+
+        movies_by_year.into_iter().take(limit).collect()
     }
 }
 
