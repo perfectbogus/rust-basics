@@ -527,6 +527,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "movie_recommendation_system"
+version = "0.1.0"
+
+[[package]]
 name = "new_type"
 version = "0.1.0"
 
@@ -831,6 +835,10 @@ name = "simple_linked_list"
 version = "0.1.0"
 
 [[package]]
+name = "simple_playlist_system"
+version = "0.1.0"
+
+[[package]]
 name = "smallvec"
 version = "1.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -856,6 +864,10 @@ version = "0.1.0"
 
 [[package]]
 name = "student_analytics_system"
+version = "0.1.0"
+
+[[package]]
+name = "student_grade_analysis_system"
 version = "0.1.0"
 
 [[package]]
