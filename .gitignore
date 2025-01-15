@@ -3,3 +3,6 @@
 .idea
 
 Cargo.lock
+
+./input_output_challenge/target
+./module_challenge/target
