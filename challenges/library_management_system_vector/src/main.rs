@@ -84,8 +84,14 @@ impl Library {
     }
 
     fn shrink_capacity(&mut self) {
-
+        self.books.shrink_to_fit();
     }
+
+    fn sort_by_id(&mut self) {
+        self.books.sort_by(|a, b| a.id.cmp(&b.id));
+    }
+
+
 
 }
 
