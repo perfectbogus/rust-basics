@@ -50,6 +50,43 @@ impl Library {
         self.books.pop()
     }
 
+    fn clear_category(&mut self, category: &str) {
+        self.books.retain(|book| book.category != category);
+    }
+
+    fn get_book(&self, index: usize) -> Option<&Book> {
+        if index >= self.books.len() {
+            None
+        } else {
+            self.books.get(index)
+        }
+    }
+
+    fn get_mut_book(&mut self, index: usize) -> Option<&mut Book> {
+        if index >= self.books.len() {
+            None
+        } else {
+            self.books.get_mut(index)
+        }
+    }
+
+    fn first_book(&self) -> Option<&Book> {
+        self.books.first()
+    }
+
+    fn last_book(&self) -> Option<&Book> {
+        self.books.last()
+    }
+
+    // Capacity Management
+    fn reserve_additional(&mut self, additional: usize) {
+        self.books.reserve(additional);
+    }
+
+    fn shrink_capacity(&mut self) {
+
+    }
+
 }
 
 #[cfg(test)]
