@@ -465,6 +465,10 @@ name = "library_management_system_hashmap"
 version = "0.1.0"
 
 [[package]]
+name = "library_management_system_vector"
+version = "0.1.0"
+
+[[package]]
 name = "linked_list"
 version = "0.1.0"
 
