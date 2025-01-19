@@ -77,6 +77,57 @@ mod tests {
         assert!(removed.is_some());
         assert_eq!(library.books.len(), 0);
     }
+
+    #[test]
+    fn test_insert_at(index: usize, book: Book) {
+        let mut library = Library::new();
+        library.add_book(create_test_book(1));
+
+        // Insert at valid index
+        assert!(library.insert_book_at(0, create_test_book(2)).is_ok());
+
+        // Insert at invalid index
+        assert!(library.insert_book_at(5, create_test_book(3)).is_err());
+    }
+
+    #[test]
+    fn test_capacity_management() {
+        let mut library = Library::with_capacity(10);
+        assert!(library.books.capacity() >= 10);
+
+        library.add_book(create_test_book(1));
+        library.shink_capacity();
+        assert!(library.books.capacity() >= 1);
+    }
+
+    #[test]
+    fn test_sorting() {
+        let mut library = Library::new();
+        library.add_book(create_test_book(3));
+        library.add_book(create_test_book(1));
+        library.add_book(create_test_book(2));
+
+        library.sort_by_id();
+        assert_eq!(library.books[0].id, 1);
+
+        library.reverse_order();
+        assert_eq!(library.books[0].id, 3);
+    }
+
+    #[test]
+    fn test_searching() {
+        let mut library = Library::new();
+        library.add_book(Book {
+            id: 1,
+            title: String::from("Test"),
+            category: String::from("Fiction"),
+        });
+
+        assert!(library.find_by_id(1).is_some());
+        assert_eq!(library.books_in_category("Fiction").len(), 1);
+    }
+
+
 }
 
 
