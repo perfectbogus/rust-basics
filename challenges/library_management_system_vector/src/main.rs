@@ -38,12 +38,17 @@ impl Library {
     }
 
     fn remove_book_by_id(&mut self, id: u32) -> Option<Book> {
-        for (i, book) in self.books.iter().enumerate() {
-            if book.id == id {
-                Some(self.books.remove(i));
-            }
+        self.books.iter()
+            .position(|book| book.id == id)
+            .map(|index| self.books.remove(index))
+    }
+
+    fn split_at_index(&self, mid: usize) -> Result<(&[Book], &[Book]), String> {
+        if mid > self.books.len() {
+            Err(String::from("Index out of bounds"))
+        } else {
+            Ok(self.books.split_at(mid))
         }
-        None
     }
 
     fn remove_last(&mut self) -> Option<Book> {
@@ -55,19 +60,11 @@ impl Library {
     }
 
     fn get_book(&self, index: usize) -> Option<&Book> {
-        if index >= self.books.len() {
-            None
-        } else {
-            self.books.get(index)
-        }
+        self.books.get(index)
     }
 
     fn get_mut_book(&mut self, index: usize) -> Option<&mut Book> {
-        if index >= self.books.len() {
-            None
-        } else {
-            self.books.get_mut(index)
-        }
+        self.books.get_mut(index)
     }
 
     fn first_book(&self) -> Option<&Book> {
@@ -91,7 +88,17 @@ impl Library {
         self.books.sort_by(|a, b| a.id.cmp(&b.id));
     }
 
+    fn reverse_order(&mut self) {
+        self.books.reverse();
+    }
 
+    fn find_by_id(&self, id: u32) -> Option<&Book> {
+        self.books.iter().find(|book| book.id == id)
+    }
+
+    fn books_in_category(&self, category: &str) -> Vec<&Book> {
+        self.books.iter().filter(|book| book.category == category).collect()
+    }
 
 }
 
@@ -105,6 +112,18 @@ mod tests {
             title: format!("Books {}", id),
             category: String::from("Test")
         }
+    }
+
+    #[test]
+    fn test_new() {
+        let library = Library::new();
+        assert!(library.books.is_empty());
+    }
+
+    #[test]
+    fn test_with_capacity() {
+        let library = Library::with_capacity(10);
+        assert!(library.books.capacity() >= 10);
     }
 
     #[test]
@@ -122,7 +141,32 @@ mod tests {
     }
 
     #[test]
-    fn test_insert_at(index: usize, book: Book) {
+    fn test_add_multiple_books() {
+        let mut library = Library::new();
+        let books = vec![
+            create_test_book(1),
+            create_test_book(2)
+        ];
+        library.add_multiple_books(books);
+        assert_eq!(library.books.len(), 2)
+    }
+
+    #[test]
+    fn test_first_and_last_book() {
+        let mut library = Library::new();
+
+        assert!(library.first_book().is_none());
+        assert!(library.last_book().is_none());
+
+        library.add_book(create_test_book(1));
+        library.add_book(create_test_book(2));
+
+        assert_eq!(library.first_book().unwrap().id, 1);
+        assert_eq!(library.last_book().unwrap().id, 2);
+    }
+
+    #[test]
+    fn test_insert_at() {
         let mut library = Library::new();
         library.add_book(create_test_book(1));
 
@@ -139,7 +183,7 @@ mod tests {
         assert!(library.books.capacity() >= 10);
 
         library.add_book(create_test_book(1));
-        library.shink_capacity();
+        library.shrink_capacity();
         assert!(library.books.capacity() >= 1);
     }
 
