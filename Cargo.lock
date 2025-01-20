@@ -245,6 +245,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "custom_expression_evaluator"
+version = "0.1.0"
+
+[[package]]
 name = "custom_vector_queue"
 version = "0.1.0"
 
