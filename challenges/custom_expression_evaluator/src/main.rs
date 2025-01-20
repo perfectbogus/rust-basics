@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 enum Operator {
     Add,
     Subtract,
@@ -24,13 +24,53 @@ impl Expression {
         // For Operation nodes, recursively evaluate left and right expressions
         // For Negate nodes, recursively evaluate and negate the result
         // For Number nodes, return the value
-        unimplemented!()
+        match self {
+            Expression::Number(n) => { Ok(*n) }
+            Expression::Operation(exprA, op, exprB) => {
+                match op {
+                    Operator::Add => { Ok(exprA.evaluate()? + exprB.evaluate()?) }
+                    Operator::Subtract => { Ok(exprA.evaluate()? - exprB.evaluate()?) }
+                    Operator::Multiply => { Ok(exprA.evaluate()? * exprB.evaluate()?) }
+                    Operator::Divide => { Ok(exprA.evaluate()? / exprB.evaluate()?) }
+                }
+            }
+            Expression::Negate(expr) => { Ok(-expr.evaluate()?) }
+        }
     }
 
     fn simplify(&self) -> Expression {
         // TODO: Simplify the expression where possible
         // e.g., 5 + 0 = 5, x * 1 = x, x + (-y) = x - y
-        unimplemented!()
+        match self {
+            Expression::Number(n) => { Expression::Number(*n) }
+            Expression::Negate(expr) => {
+                let simplified = expr.simplify();
+                match simplified {
+                    Expression::Number(n) => { Expression::Number(-n)}
+                    _ => Expression::Negate(Box::new(simplified))
+                }
+            },
+            Expression::Operation(left, op, right) => {
+                let left_simplified = left.simplify();
+                let right_simplified = right.simplify();
+
+                match (op, &left_simplified, &right_simplified) {
+                    (Operator::Add, _, Expression::Number(n)) if *n == 0.0 => left_simplified,
+                    (Operator::Add, Expression::Number(n), _) if *n == 0.0 => right_simplified,
+                    (Operator::Multiply, _, Expression::Number(n)) if *n == 0.0 => Expression::Number(0.0),
+                    (Operator::Multiply, Expression::Number(n), _) if *n == 0.0 => Expression::Number(0.0),
+                    (Operator::Multiply, _, Expression::Number(n)) if *n == 1.0 => left_simplified,
+                    (Operator::Multiply, Expression::Number(n), _) if *n == 1.0 => right_simplified,
+                    (Operator::Divide, Expression::Number(n), _) if *n == 1.0 => left_simplified,
+                    _ => Expression::Operation(
+                        Box::new(left_simplified),
+                        *op,
+                        Box::new(right_simplified)
+                    )
+                }
+            }
+
+        }
     }
 
     fn height(&self) -> usize {
