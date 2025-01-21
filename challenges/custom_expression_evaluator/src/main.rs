@@ -1,3 +1,4 @@
+use std::cmp::max;
 #[derive(Debug, PartialEq, Copy, Clone)]
 enum Operator {
     Add,
@@ -76,7 +77,13 @@ impl Expression {
     fn height(&self) -> usize {
         // TODO: Calculate height of expression tree
         // Number nodes have height 1
-        unimplemented!()
+        match self {
+            Expression::Number(_) => { 1 }
+            Expression::Operation(left, _, right) => {
+                max(left.height(), right.height()) + 1
+            }
+            Expression::Negate(expr) => { expr.height() }
+        }
     }
 
 }
