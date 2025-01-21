@@ -85,11 +85,11 @@ impl Expression {
         // TODO: Calculate height of expression tree
         // Number nodes have height 1
         match self {
-            Expression::Number(_) => { 1 }
+            Expression::Number(_) =>  1,
             Expression::Operation(left, _, right) => {
                 max(left.height(), right.height()) + 1
             }
-            Expression::Negate(expr) => { expr.height() }
+            Expression::Negate(expr) => expr.height() + 1
         }
     }
 
@@ -111,31 +111,20 @@ impl ExpressionBuilder {
     fn operation(&mut self, op: Operator) -> Result<&mut Self, String> {
         // TODO: Pop two expression and combine them with the operator
         // return error if there aren't enough expression on stack
-        let left = self.expression_stack.pop().ok_or(String::from("Expression stack is empty"))?;
-        let right = self.expression_stack.pop().ok_or(String::from("Expression stack is empty"))?;
-
-        match op {
-            Operator::Add => {
-                let result = Expression::Number(left.evaluate()? + right.evaluate()?);
-                self.expression_stack.push(result);
-                Ok(self)
-            }
-            Operator::Subtract => {
-                let expr = Expression::Number(left.evaluate()? - right.evaluate()?);
-                self.expression_stack.push(expr);
-                Ok(self)
-            }
-            Operator::Multiply => {
-                let expr = Expression::Number(left.evaluate()? * right.evaluate()?);
-                self.expression_stack.push(expr);
-                Ok(self)
-            }
-            Operator::Divide => {
-                let expr = Expression::Number(left.evaluate()? / right.evaluate()?);
-                self.expression_stack.push(expr);
-                Ok(self)
-            }
+        if self.expression_stack.len() < 2 {
+            return Err(String::from("Not enough operands"))
         }
+
+        let left = self.expression_stack.pop().unwrap();
+        let right = self.expression_stack.pop().unwrap();
+
+        self.expression_stack.push(Expression::Operation(
+           Box::new(left),
+           op,
+           Box::new(right)
+        ));
+
+        Ok(self)
     }
 
     fn negate(&mut self) -> Result<&mut Self, String> {
