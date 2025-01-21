@@ -27,12 +27,19 @@ impl Expression {
         // For Number nodes, return the value
         match self {
             Expression::Number(n) => { Ok(*n) }
-            Expression::Operation(exprA, op, exprB) => {
+            Expression::Operation(left, op, right) => {
                 match op {
-                    Operator::Add => { Ok(exprA.evaluate()? + exprB.evaluate()?) }
-                    Operator::Subtract => { Ok(exprA.evaluate()? - exprB.evaluate()?) }
-                    Operator::Multiply => { Ok(exprA.evaluate()? * exprB.evaluate()?) }
-                    Operator::Divide => { Ok(exprA.evaluate()? / exprB.evaluate()?) }
+                    Operator::Add => { Ok(left.evaluate()? + right.evaluate()?) }
+                    Operator::Subtract => { Ok(left.evaluate()? - right.evaluate()?) }
+                    Operator::Multiply => { Ok(left.evaluate()? * right.evaluate()?) }
+                    Operator::Divide => {
+                        let right_value = right.evaluate()?;
+                        if right_value == 0.0 {
+                            Err(String::from("divide by zero"))
+                        } else {
+                            Ok(left.evaluate()? / right.evaluate()?)
+                        }
+                    }
                 }
             }
             Expression::Negate(expr) => { Ok(-expr.evaluate()?) }
@@ -91,30 +98,62 @@ impl Expression {
 impl ExpressionBuilder {
     fn new() -> Self {
         // TODO: Initialize builder with empty stack
-        unimplemented!()
+        Self { expression_stack: Vec::new() }
     }
 
-    fn number(&mut self, value: f64) -> &mut self {
+    fn number(&mut self, value: f64) -> &mut Self {
         // TODO: Push a Number expression onto the stack
-        unimplemented!()
+        let expr = Expression::Number(value);
+        self.expression_stack.push(expr);
+        self
     }
 
-    fn operation(&mut self, op: Operator) -> Result<&mut self, String> {
+    fn operation(&mut self, op: Operator) -> Result<&mut Self, String> {
         // TODO: Pop two expression and combine them with the operator
         // return error if there aren't enough expression on stack
-        unimplemented!()
+        let left = self.expression_stack.pop().ok_or(String::from("Expression stack is empty"))?;
+        let right = self.expression_stack.pop().ok_or(String::from("Expression stack is empty"))?;
+
+        match op {
+            Operator::Add => {
+                let result = Expression::Number(left.evaluate()? + right.evaluate()?);
+                self.expression_stack.push(result);
+                Ok(self)
+            }
+            Operator::Subtract => {
+                let expr = Expression::Number(left.evaluate()? - right.evaluate()?);
+                self.expression_stack.push(expr);
+                Ok(self)
+            }
+            Operator::Multiply => {
+                let expr = Expression::Number(left.evaluate()? * right.evaluate()?);
+                self.expression_stack.push(expr);
+                Ok(self)
+            }
+            Operator::Divide => {
+                let expr = Expression::Number(left.evaluate()? / right.evaluate()?);
+                self.expression_stack.push(expr);
+                Ok(self)
+            }
+        }
     }
 
-    fn negate(&mut self) -> Result<&mut self, String> {
+    fn negate(&mut self) -> Result<&mut Self, String> {
         // TODO: Pop one expression and negate it
         // Return error if stack is empty
-        unimplemented!()
+        let expr = self.expression_stack.pop().ok_or(String::from("Expression stack is empty"))?;
+        let value = expr.evaluate()?;
+        let n_expr = Expression::Number(-value);
+        self.expression_stack.push(n_expr);
+        Ok(self)
     }
 
     fn build(&mut self) -> Result<Expression, String> {
         // TODO: Return final expression
         // Error if stack doesn't contain exactly one expression
-        unimplemented!()
+        let expr = self.expression_stack.pop().ok_or(String::from("Expression stack is empty"))?;
+        let value = expr.evaluate()?;
+        Ok(Expression::Number(value))
     }
 }
 
@@ -123,7 +162,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_simple_addition() {
+    fn test_simple() {
         let expr = Expression::Operation(
             Box::new(Expression::Number(5.0)),
             Operator::Add,
@@ -131,6 +170,14 @@ mod tests {
         );
 
         assert_eq!(expr.evaluate().unwrap(), 8.0);
+
+        let expr = Expression::Operation(
+            Box::new(Expression::Number(5.0)),
+            Operator::Subtract,
+            Box::new(Expression::Number(3.0))
+        );
+
+        assert_eq!(expr.evaluate().unwrap(), 2.0);
     }
 
     #[test]
@@ -180,6 +227,62 @@ mod tests {
             Expression::Number(n) => assert_eq!(n, 5.0),
             _ => panic!("Expression wasn't simplified!")
         }
+    }
+
+    fn create_test_expression() -> Expression {
+        // Test basic arithmetic: (5 + 3) * 2
+        let expr = Expression::Operation(
+            Box::new(Expression::Operation(
+                Box::new(Expression::Number(5.0)),
+                Operator::Add,
+                Box::new(Expression::Number(3.0))
+            )),
+            Operator::Multiply,
+            Box::new(Expression::Number(2.0))
+        );
+        expr
+    }
+
+    #[test]
+    fn test_evaluate() {
+        let expr = create_test_expression();
+
+        assert_eq!(expr.evaluate().unwrap(), 16.0);
+    }
+
+    #[test]
+    fn test_height() {
+        // Test height of expression tree: (5 + 3) * 2
+        let expr = create_test_expression();
+
+        assert_eq!(expr.height(), 3);  // Level 1: *, Level 2: +, Level 3: numbers
+    }
+
+    #[test]
+    fn test_expression_builder() {
+        let mut builder = ExpressionBuilder::new();
+
+        // Build: 5 + 3
+        builder.number(5.0)
+            .number(3.0)
+            .operation(Operator::Add)
+            .unwrap();
+
+        let expr = builder.build().unwrap();
+        assert_eq!(expr.evaluate().unwrap(), 8.0);
+    }
+
+    #[test]
+    fn test_negate() {
+        let mut builder = ExpressionBuilder::new();
+
+        // Build: -5
+        builder.number(5.0)
+            .negate()
+            .unwrap();
+
+        let expr = builder.build().unwrap();
+        assert_eq!(expr.evaluate().unwrap(), -5.0);
     }
 }
 
