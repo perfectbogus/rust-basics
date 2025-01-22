@@ -51,17 +51,47 @@ impl FSItem {
     fn add_item(&mut self, item: FSItem) -> Result<(), String> {
         // TODO: Add item to directory
         // Error if self is a file
-        unimplemented!()
+        match self {
+            FSItem::File { .. } => Err(format!("{} is a file", self.name())),
+            FSItem::Directory { contents, .. } => {
+                contents.push(item);
+                Ok(())
+            }
+        }
     }
 
     fn find(&self, name: &str) -> Option<&FSItem> {
         // TODO: Find item by name (non-recursively, only in current directory)
-        unimplemented!()
+        match self {
+            FSItem::File { .. } => { None }
+            FSItem::Directory { contents, .. } => {
+                contents.as_ref().iter().find(|item| item.name() == name)
+            }
+        }
     }
 
     fn find_recursive(&self, path: &str) -> Option<&FSItem> {
         // TODO: Find item by path (e.g., "documents/work/file.txt")
-        unimplemented!()
+        let parts: Vec<&str> = path.split('/').collect();
+        let [first, rest @ ..] = parts.as_slice() else { return None };
+
+        match self {
+            FSItem::File { .. } => {
+                if self.name() == *first && rest.is_empty() {
+                    Some(self)
+                } else {
+                    None
+                }
+            }
+            FSItem::Directory { contents, .. } => {
+                let found = contents.iter().find(|item| item.name() == *first)?;
+                if rest.is_empty() {
+                    Some(found)
+                } else {
+                    found.find_recursive(rest.join("/").as_str())
+                }
+            }
+        }
     }
 
     fn delete(&mut self, name: &str) -> Result<FSItem, String> {
