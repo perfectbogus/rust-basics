@@ -114,13 +114,50 @@ impl FSItem {
 impl FileSystem {
     fn new() -> Self {
         // TODO: Create new filesystem with root directory
-        unimplemented!()
+        FileSystem {
+            root: FSItem::Directory {
+                name: String::from("/"),
+                contents: Box::new(Vec::new())
+            }
+        }
     }
 
     fn add_path(&mut self, path: &str, item: FSItem) -> Result<(), String> {
         // TODO: Add item at specified path , creating parent directories if needed
-        unimplemented!()
+        let parts: Vec<&str> = path.split('/').collect();
+        // Skip empty first part if path starts with '/'
+        let parts = if parts[0].is_empty() { &parts[1..] } else { &parts };
+
+        let mut current = &mut self.root;
+
+        for &part in &parts[..parts.len() - 1] {
+            current = match current {
+                FSItem::Directory { contents, .. } => {
+                    // Find or create directory
+                    if let Some(dir) = contents.iter_mut().find(|item| item.name() == part) {
+                        dir
+                    } else {
+                        contents.push(FSItem::new_directory(part.to_string()));
+                        contents.last_mut().unwrap()
+                    }
+                }
+                FSItem::File { .. } => {
+                    return Err(format!("{} is a file, not a directory", current.name()))
+                }
+            };
+        }
+
+        match current {
+            FSItem::Directory { .. } => {
+                current.add_item(item)?;
+                Ok(())
+            }
+            FSItem::File { .. } => {
+                Err(format!("{} is a file, not a directory", current.name()))
+            }
+        }
     }
+
 
     fn find(&self, path: &str) -> Option<&FSItem> {
         // TODO: Find item at specified path
