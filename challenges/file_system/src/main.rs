@@ -97,7 +97,17 @@ impl FSItem {
     fn delete(&mut self, name: &str) -> Result<FSItem, String> {
         // TODO: Remove and return item from directory
         // Error if self is a file or item not found
-        unimplemented!()
+        match self {
+            FSItem::File { .. } => {
+                Err(format!("{} is a file, can't delete", self.name()))
+            }
+            FSItem::Directory { contents, .. } => {
+                let index = contents.iter()
+                    .position(|item| item.name() == name)
+                    .ok_or(format!("Item {} not found", name))?;
+                Ok(contents.remove(index))
+            }
+        }
     }
 }
 
