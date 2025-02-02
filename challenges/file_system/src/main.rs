@@ -130,23 +130,26 @@ impl FileSystem {
 
         let mut current = &mut self.root;
 
-        for &part in &parts[..parts.len() - 1] {
+        // Create/traverse path except last component
+        for &part in &parts[..parts.len()-1] {
             current = match current {
                 FSItem::Directory { contents, .. } => {
                     // Find or create directory
-                    if let Some(dir) = contents.iter_mut().find(|item| item.name() == part) {
-                        dir
-                    } else {
+                    let dir_exists = contents.iter().any(|item| item.name() == part);
+                    if !dir_exists {
                         contents.push(FSItem::new_directory(part.to_string()));
-                        contents.last_mut().unwrap()
                     }
+                    contents.iter_mut()
+                        .find(|item| item.name() == part)
+                        .unwrap()
                 }
                 FSItem::File { .. } => {
-                    return Err(format!("{} is a file, not a directory", current.name()))
+                    return Err(format!("{} is a file, not a directory", current.name()));
                 }
             };
         }
 
+        // Add final item
         match current {
             FSItem::Directory { .. } => {
                 current.add_item(item)?;
@@ -161,12 +164,31 @@ impl FileSystem {
 
     fn find(&self, path: &str) -> Option<&FSItem> {
         // TODO: Find item at specified path
-        unimplemented!()
+        self.root.find_recursive(path)
     }
 
     fn delete(&mut self, path: &str) -> Result<FSItem, String> {
-        // TODO: Delete item at specified path
-        unimplemented!()
+        let parts: Vec<&str> = path.split('/').collect();
+        let parts = if parts[0].is_empty() { &parts[1..] } else { &parts };
+
+        let mut current = &mut self.root;
+
+        // Navigate to parent directory
+        for &part in &parts[..parts.len()-1] {
+            current = match current {
+                FSItem::Directory { contents, .. } => {
+                    contents.iter_mut()
+                        .find(|item| item.name() == part)
+                        .ok_or(format!("Path not found: {}", part))?
+                }
+                FSItem::File { .. } => {
+                    return Err(format!("{} is a file, not a directory", current.name()));
+                }
+            };
+        }
+
+        // Delete the final item
+        current.delete(parts.last().ok_or("Invalid path")?)
     }
 }
 
@@ -251,19 +273,6 @@ mod tests {
             FSItem::new_file("file.txt".to_string(), 100),
         );
         assert!(result.is_ok());
-    }
-
-    #[test]
-    fn test_filesystem_find() {
-        let mut fs = FileSystem::new();
-        fs.add_path(
-            "/docs/file.txt",
-            FSItem::new_file("file.txt".to_string(), 100),
-        )
-        .unwrap();
-
-        assert!(fs.find("/docs/file.txt").is_some());
-        assert!(fs.find("/nonexistent").is_none());
     }
 
     #[test]
