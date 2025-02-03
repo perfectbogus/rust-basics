@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use regex::Regex;
 
 #[derive(Debug, PartialEq)]
@@ -8,7 +9,7 @@ enum ContentType {
     Code(String), // Programming language
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct Content {
     id: u32,
     content_type: ContentType,
@@ -16,7 +17,7 @@ struct Content {
     metadata: Option<Metadata>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct Metadata {
     author: String,
     tags: Vec<String>,
@@ -58,13 +59,26 @@ impl TextProcessor {
                     TextPattern::Contains(s) => { c.text.contains(s) }
                     TextPattern::StartsWith(s) => { c.text.starts_with(s) }
                     TextPattern::EndsWith(s) => { c.text.ends_with(s) }
-                    TextPattern::Regex(s) => { }
-                    TextPattern::And(left, right) => {}
-                    TextPattern::Or(left, right) => {}
-                    TextPattern::Not(tp) => {}
+                    TextPattern::Regex(s) => {
+                        let re = Regex::new(s).map_err(|_| "Invalid Regex");
+                        re.is_match(&c.text)
+                    }
+                    TextPattern::And(left, right) => {
+                        self.matches_pattern(c, left) && self.matches_pattern(c, right)
+                    }
+                    TextPattern::Or(left, right) => {
+                        self.matches_pattern(c, left) || self.matches_pattern(c, right)
+                    }
+                    TextPattern::Not(tp) => {
+                        !self.matches_pattern(c, tp)
+                    }
                 }
             })
             .collect()
+    }
+
+    fn matches_pattern(&self, content: &Content, pattern: &TextPattern) -> bool {
+        self.find_by_pattern(pattern).contains(&content)
     }
 }
 
