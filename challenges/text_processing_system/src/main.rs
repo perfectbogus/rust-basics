@@ -194,13 +194,11 @@ mod tests {
     fn test_find_by_type() {
         let mut processor = TextProcessor::new();
 
-        let content = Content {
-            id: 1,
-            content_type: ContentType::Code("rust".to_string()),
-            text: "fn main() {}".to_string(),
-            metadata: None,
-        };
-        processor.add_content(content);
+        let contents = create_contents();
+        //contents.into_iter().for_each(|content| { processor.add_content(content); });
+        for content in contents {
+            processor.add_content(content);
+        }
 
         // Test exact match for Code type
         let rust_content = processor.find_by_type(
@@ -270,16 +268,40 @@ mod tests {
         assert!(categories.contains_key("code"));
         assert_eq!(categories["code"].len(), 1);
     }
+
+    #[test]
+    fn test_pattern_starts_with() {
+        let mut processor = TextProcessor::new();
+
+        let contents = create_contents();
+        for content in contents {
+            processor.add_content(content);
+        }
+
+        let pattern = TextPattern::StartsWith("Hello".to_string());
+        let results = processor.find_by_pattern(&pattern);
+
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].id, 0);
+    }
+
+    #[test]
+    fn test_pattern_ends_with() {
+        let mut processor = TextProcessor::new();
+
+        create_contents().into_iter().for_each(|content| { processor.add_content(content); });
+
+        let pattern = TextPattern::EndsWith("World".to_string());
+        let results = processor.find_by_pattern(&pattern);
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].id, 0);
+    }
+
+    #[test]
+    fn test_pattern_regex() {
+
+    }
 }
-
-
-
-
-
-
-
-
-
 
 fn main() {
     println!("Hello, world!");
