@@ -174,7 +174,7 @@ mod tests {
         let tuple = vec![
             (PlainText, "Hello World".to_string()),
             (Html, "<h1>Hi</h1>".to_string()),
-            (Markdown, "<h1>Hi</h1>".to_string()),
+            (Markdown, "# Title\nContent".to_string()),
             (Code("rust".to_string()), "fn main() {}".to_string())
         ];
 
@@ -299,7 +299,40 @@ mod tests {
 
     #[test]
     fn test_pattern_regex() {
+        let mut processor = TextProcessor::new();
 
+        create_contents().into_iter().for_each(|content| { processor.add_content(content); });
+
+        let pattern = TextPattern::Regex(r"^fn\s+main".to_string());
+        let results = processor.find_by_pattern(&pattern);
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].id, 3)
+    }
+
+    #[test]
+    fn test_pattern_or() {
+        let mut processor = TextProcessor::new();
+        create_contents().into_iter().for_each(|content| { processor.add_content(content); });
+
+        let pattern = TextPattern::Or(
+            Box::new(TextPattern::Contains("Hello".to_string())),
+            Box::new(TextPattern::Contains("Title".to_string()))
+        );
+
+        let results = processor.find_by_pattern(&pattern);
+        assert_eq!(results.len(), 2);
+        assert_eq!(results[0].id, 0);
+    }
+
+    #[test]
+    fn test_pattern_not() {
+        let mut processor = TextProcessor::new();
+        create_contents().into_iter().for_each(|content| { processor.add_content(content); });
+
+        let pattern = TextPattern::Not(Box::new(TextPattern::Contains("Hello".to_string())));
+
+        let results = processor.find_by_pattern(&pattern);
+        assert_eq!(results.len(), 3);
     }
 }
 
