@@ -93,24 +93,122 @@ impl Project {
     fn assign_task(&mut self, task_id: u32, user: String) -> Result<(), String> {
         // Assign task to user
         // Update assignments map
-        let mut task = self.tasks.get_mut(&task_id).unwrap();
+        let task = self.tasks.get_mut(&task_id)
+            .ok_or(format!("Task {} not found", task_id))?;
 
+        if let Some(prev_user) = &task.assigned_to {
+            if let Some(tasks) = self.assignments.get_mut(prev_user) {
+                tasks.retain(|&id| id != task_id);
+            }
+        }
+
+        task.assigned_to = Some(user.clone());
+        self.assignments.entry(user)
+            .or_insert_with(Vec::new)
+            .push(task_id);
+
+        Ok(())
     }
 
     fn update_status(&mut self, task_id: u32, status: TaskStatus) -> Result<(), String>{
         // update task status
         // validate dependencies are done if making as Done
-        unimplemented!()
+        let dependencies = if let Some(task) = self.tasks.get(&task_id) {
+            task.dependencies.clone()
+        } else {
+            return Err(format!("Task {} not found", task_id));
+        };
+
+        // Check dependencies if making as Done
+        if status == TaskStatus::Done {
+            for dep_id in &dependencies {
+                let dep_task = self.tasks.get(dep_id)
+                    .ok_or(format!("Task {} not found", dep_id))?;
+
+                if dep_task.status != TaskStatus::Done {
+                    return Err(format!("Task {} depends on with id {} but not done", dep_id, dep_task.id));
+                }
+            }
+        }
+
+        if let Some(task) = self.tasks.get_mut(&task_id) {
+            task.status = status;
+            Ok(())
+        } else {
+            Err(format!("Task {} not found", task_id))
+        }
     }
 
     fn get_blocked_tasks(&self) -> Vec<&Task> {
         // Return task blocked by incomplete dependencies
-        unimplemented!()
+        let mut blocked_tasks = Vec::new();
+        for task in self.tasks.values() {
+            for dep_in in &task.dependencies {
+                if let Some(dep_task) = self.tasks.get(&dep_in) {
+                    if dep_task.status != TaskStatus::Done {
+                        blocked_tasks.push(task);
+                        break;
+                    }
+                }
+            }
+        }
+        blocked_tasks
     }
 
     fn get_user_tasks(&self, user: &str) -> Vec<&Task> {
         // get all tasks assigned to user
-        unimplemented!()
+        self.tasks.iter()
+            .filter(|&(_, task)| {
+                task.assigned_to == Some(user.to_string())
+            })
+            .map(|(_, task)| task)
+            .collect()
+
+        // self.tasks.iter()
+        //     .filter_map(|(id, task)| {
+        //         if task.assigned_to == Some(user.to_string()) {
+        //             Some(task)
+        //         } else {
+        //             None
+        //         }
+        //     })
+        //     .collect::<Vec<&Task>>()
+
+
+        // self.tasks.iter()
+        //     .filter_map(|(task_id, task)| {
+        //         match &task.assigned_to {
+        //             None => { None }
+        //             Some(assigned) => {
+        //                 if assigned == user {
+        //                     return Some(task)
+        //                 }
+        //                 None
+        //             }
+        //         }
+        //     })
+        //     .collect::<Vec<&Task>>()
+
+        // self.tasks.iter()
+        //     .filter_map(|(_, task)| {
+        //         if let Some(assigned_to) = &task.assigned_to {
+        //             if user == assigned_to {
+        //                 return Some(task)
+        //             }
+        //         }
+        //         None
+        //     })
+        //     .collect()
+
+
+
+        // let mut user_tasks = Vec::new();
+        // for task in self.tasks.values() {
+        //     if task.assigned_to == Some(user.to_string()) {
+        //         user_tasks.push(task);
+        //     }
+        // }
+        // user_tasks
     }
 
     fn remove_task(&mut self, task_id: u32) -> Result<Task, String> {
@@ -195,6 +293,35 @@ mod tests {
     }
 
     #[test]
+    fn test_get_blocked_tasks() {
+        let mut project = Project::new();
+
+        // Create task with dependencies
+        let task1 = project.add_task("Task 1".to_string(), None);
+        let task2 = project.add_task("Task 2".to_string(), None);
+        let task3 = project.add_task("Task 3".to_string(), None);
+
+        project.add_dependency(task2, task1).unwrap();
+        project.add_dependency(task3, task2).unwrap();
+
+        // Task 2 and 3 should be blocked initially
+        let blocked = project.get_blocked_tasks();
+        assert_eq!(blocked.len(), 2);
+        assert!(blocked.iter().any(|t| t.id == task2));
+        assert!(blocked.iter().any(|t| t.id == task3));
+
+        // Complete task1, task2 should be unblocked but task3 still blocked
+        project.update_status(task1, TaskStatus::Done).unwrap();
+        let blocked = project.get_blocked_tasks();
+        assert_eq!(blocked.len(), 1);
+        assert!(blocked.iter().any(|t| t.id == task3));
+
+        // Complete task2, nothing should be blocked
+        project.update_status(task2, TaskStatus::Done).unwrap();
+        assert!(project.get_blocked_tasks().is_empty());
+    }
+
+    #[test]
     fn test_remove_task() {
         let mut project = Project::new();
         let task1 = project.add_task("Task 1".to_string(), Some("user1".to_string()));
@@ -204,36 +331,18 @@ mod tests {
         assert!(!project.tasks.contains_key(&task1));
         assert!(project.assignments.get("user1").unwrap().is_empty());
     }
+
+    #[test]
+    fn test_user_tasks() {
+        let mut project = Project::new();
+        let task1 = project.add_task("Task 1".to_string(), Some("user1".to_string()));
+        let task2 = project.add_task("Task 2".to_string(), Some("user2".to_string()));
+        let task3 = project.add_task("Task 3".to_string(), Some("user3".to_string()));
+
+        assert_eq!(project.get_user_tasks("user1").len(), 1);
+        assert_eq!(project.get_user_tasks("user2").len(), 1);
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 fn main() {
     println!("Hello, world!");
