@@ -25,8 +25,12 @@ struct Project {
 }
 
 impl Project {
-    fn new() -> Project {
-        unimplemented!()
+    fn new() -> Self {
+        Self {
+            tasks: HashMap::new(),
+            assignments: HashMap::new(),
+            next_id: 0,
+        }
     }
 
     fn add_task(&mut self, title: String, assigned_to: Option<String>) -> u32 {
