@@ -37,5 +37,5 @@ members = [
     "challenges/reference_counting_aspects", "challenges/box_binary_search_tree",
     "challenges/temperature_analysis_system", "challenges/library_management_system_vector",
     "challenges/custom_expression_evaluator", "challenges/file_system", "challenges/text_processing_system",
-    "challenges/task_manager_system_medium",
+    "challenges/task_manager_system_medium", "challenges/game_inventory_system",
 ]
