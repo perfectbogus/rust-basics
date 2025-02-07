@@ -1,4 +1,6 @@
 use std::collections::{HashMap, HashSet};
+use std::fmt::format;
+
 fn main() {
     println!("Hello, world!");
 }
@@ -28,7 +30,15 @@ impl GameInventory {
     // Medium: Add crafting recipe
     fn add_recipe(&mut self, result: String, ingredients: HashMap<String, u32>) -> Result<(), String> {
         // Validate ingredients exist in prices
-        unimplemented!()
+        for (ingredient, quantity) in &ingredients {
+            if let Some(current_quantity) = self.prices.get(ingredient) {
+                if *quantity > *current_quantity {
+                    return Err(format!("{} is less than the recipe quantity", ingredient));
+                }
+            }
+        }
+        self.recipes.insert(result, ingredients);
+        Ok(())
     }
 
     // Medium: Try to craft item
@@ -74,10 +84,10 @@ mod tests {
         let mut inv = GameInventory::new();
 
         let mut ingredients = HashMap::new();
-        ingredients.insert("wood".to_string(), 5);
+        ingredients.insert("wood".to_string(), 2);
         ingredients.insert("iron".to_string(), 1);
 
-        inv.prices.insert("wood".to_strin(), 5);
+        inv.prices.insert("wood".to_string(), 5);
         inv.prices.insert("iron".to_string(), 10);
 
         assert!(inv.add_recipe("axe".to_string(), ingredients).is_ok());
