@@ -157,12 +157,18 @@ impl Project {
 
     fn get_user_tasks(&self, user: &str) -> Vec<&Task> {
         // get all tasks assigned to user
-        self.tasks.iter()
-            .filter(|&(_, task)| {
-                task.assigned_to == Some(user.to_string())
-            })
-            .map(|(_, task)| task)
-            .collect()
+        self.assignments.get(user)
+            .map_or(Vec::new(), |task_ids|
+                task_ids.iter()
+                    .filter_map(|id| self.tasks.get(id))
+                    .collect()
+            )
+        // self.tasks.iter()
+        //     .filter(|&(_, task)| {
+        //         task.assigned_to == Some(user.to_string())
+        //     })
+        //     .map(|(_, task)| task)
+        //     .collect()
 
         // self.tasks.iter()
         //     .filter_map(|(id, task)| {
@@ -213,7 +219,20 @@ impl Project {
 
     fn remove_task(&mut self, task_id: u32) -> Result<Task, String> {
         // remove task and clean up dependencies/assignments
-        unimplemented!()
+        if self.tasks.values().any(|t| t.dependencies.contains(&task_id)) {
+            return Err(format!("Cannot remove task {}: other tasks depend on it", task_id));
+        }
+
+        let task = self.tasks.remove(&task_id)
+            .ok_or(format!("Task {} not found", task_id))?;
+
+        if let Some(user) = &task.assigned_to {
+            if let Some(tasks) = self.assignments.get_mut(user) {
+                tasks.retain(|&id| id != task_id);
+            }
+        }
+
+        Ok(task)
     }
 }
 
@@ -324,10 +343,24 @@ mod tests {
     #[test]
     fn test_remove_task() {
         let mut project = Project::new();
+
+        // Add tasks with dependencies and assignments
         let task1 = project.add_task("Task 1".to_string(), Some("user1".to_string()));
+        let task2 = project.add_task("Task 2".to_string(), None);
+        project.add_dependency(task2, task1).unwrap();
 
+        // Remove task1 - should fail due to dependency
+        assert!(project.remove_task(task1).is_err());
+
+        // Remove task2 first
+        let removed = project.remove_task(task2).unwrap();
+        assert_eq!(removed.id, task2);
+
+        // Now task1 can be removed
         let removed = project.remove_task(task1).unwrap();
+        assert_eq!(removed.id, task1);
 
+        // Verify cleanup
         assert!(!project.tasks.contains_key(&task1));
         assert!(project.assignments.get("user1").unwrap().is_empty());
     }
@@ -342,6 +375,7 @@ mod tests {
         assert_eq!(project.get_user_tasks("user1").len(), 1);
         assert_eq!(project.get_user_tasks("user2").len(), 1);
     }
+
 }
 
 fn main() {
