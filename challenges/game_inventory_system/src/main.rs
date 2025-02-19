@@ -44,7 +44,22 @@ impl GameInventory {
     // Medium: Try to craft item
     fn craft(&mut self, item: &str) -> Result<(), String> {
         // Check recipe exists and have ingredients
-        unimplemented!()
+        let recipe = self.recipes.get(item).ok_or("Recipe not found")?;
+
+        for (ingredient, required_amount) in recipe {
+            let available = self.items.get(ingredient)
+                .ok_or(format!("Missing ingredient: {}", ingredient))?;
+
+            if available < required_amount {
+                return Err(format!("Not enough {}: have {} need {}", ingredient, available, required_amount));
+            }
+        }
+
+        for (ingredient, amount) in recipe {
+            *self.items.get_mut(ingredient).unwrap();
+        }
+        *self.items.entry(item.to_string()).or_insert(0) += 1;
+        Ok(())
     }
 
     // Hard: Get craftable items with current inventory
