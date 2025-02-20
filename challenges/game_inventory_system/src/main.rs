@@ -64,8 +64,33 @@ impl GameInventory {
 
     // Hard: Get craftable items with current inventory
     fn get_craftable(&self) -> Vec<String> {
-        // Return items that can be crafted with current inventory
-        unimplemented!()
+        // let mut craftable: Vec<String> = Vec::new();
+        // // Return items that can be crafted with current inventory
+        // for (recipe_name, recipe) in &self.recipes {
+        //     let mut valid_recipe: bool = true;
+        //     println!("recipe: {}", recipe_name);
+        //     for (ingredient, required_amount) in recipe {
+        //         let available = self.items.get(ingredient).unwrap();
+        //         println!("ingredient: {}, amount: {}, available: {}", ingredient, required_amount, available);
+        //         if available < required_amount {
+        //             valid_recipe = false;
+        //             break;
+        //         }
+        //     }
+        //     if valid_recipe {
+        //         craftable.push(recipe_name.to_string());
+        //     }
+        // }
+        // craftable
+        self.recipes.iter()
+            .filter(|(_, recipe)| {
+                recipe.iter().all(|(ingredient, required_amount)| {
+                    self.items.get(ingredient)
+                        .map_or(false, |available| available >= required_amount)
+                })
+            })
+            .map(|(item, _)| item.clone())
+            .collect()
     }
 
     // Hard: Calculate optimal crafting sequence
