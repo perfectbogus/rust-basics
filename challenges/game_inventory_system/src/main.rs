@@ -174,4 +174,31 @@ mod tests {
         assert!(!craftable.contains(&"sword".to_string()));
     }
 
+    #[test]
+    fn test_craft_sequence() {
+        let mut inv = GameInventory::new();
+
+        // Add base materials
+        inv.add_item("wood".to_string(), 4);
+        inv.add_item("iron".to_string(), 3);
+
+        // Add recipes
+        let mut axe_recipe = HashMap::new();
+        axe_recipe.insert("wood".to_string(), 2);
+        axe_recipe.insert("iron".to_string(), 1);
+        inv.add_recipe("axe".to_string(), axe_recipe).unwrap();
+
+        let mut sword_recipe = HashMap::new();
+        sword_recipe.insert("axe".to_string(), 1); // Sword requires an axe
+        sword_recipe.insert("iron".to_string(), 2);
+        inv.add_recipe("sword".to_string(), sword_recipe).unwrap();
+
+        // Test crafting sequence for sword
+        let sequence = inv.craft_sequence("sword", 1).unwrap();
+        assert!(sequence, vec!["axe", "sword"]);
+
+        assert!(inv.craft_sequence("diamond_sword", 1).is_err());
+        assert!(inv.craft_sequence("sword", 2).is_err());
+    }
+
 }
