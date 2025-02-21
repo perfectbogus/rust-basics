@@ -96,7 +96,44 @@ impl GameInventory {
     // Hard: Calculate optimal crafting sequence
     fn craft_sequence(&self, item: &str, quantity: u32) -> Result<Vec<String>, String> {
         // Return sequence of items to craft to reach goal
-        unimplemented!()
+
+        fn build_sequence(
+            inv: &GameInventory,
+            item: &str,
+            quantity: u32,
+            visited: &mut Vec<String>
+        ) -> Result<Vec<String>, String> {
+            if visited.contains(&item.to_string()) {
+                return Err("Circular dependency detected".to_strin());
+            }
+            visited.push(item.to_string());
+
+            let mut sequence = Vec::new();
+            let recipe = inv.recipes.get(item)
+                .ok_or(format!("No recipe for {}", item))?;
+
+            // Check and build sequence for each ingredient
+            for (ingredient, required_amount) in recipe {
+                let needed = required_amount * quantity;
+                let available = inv.items.get(ingredient).unwrap_or(&0);
+
+                if available < &needed {
+                    if inv.recipes.contains_key(ingredient) {
+                        let mut subseq = build_sequence(
+                            inv, ingredient, needed - available, visited
+                        )?;
+                        sequence.append(&mut subseq);
+                    } else {
+                        return Err(format!("Not enough {} and can't craft it", ingredient));
+                    }
+                }
+            }
+            sequence.push(item.to_string());
+            Ok(sequence)
+        }
+
+        let mut visited = Vec::new();
+        build_sequence(self, item, quantity, &mut visited)
     }
 
     // Expert: Trade optimization
