@@ -27,22 +27,35 @@ impl WordAnalytics {
         self.count_words(text);
         self.track_pairs(text);
         self.first_occurrence(text);
+
     }
 
     fn first_occurrence(&mut self, text: &str) {
-        let mut count = 0;
-        for word in text.split_whitespace() {
-            self.first_seen.insert(word.to_string(), count);
-            count += 1;
-        }
+        text.split_whitespace().enumerate()
+            .for_each(|(pos, word)| {
+                self.first_seen.entry(word.to_string())
+                    .or_insert(pos);
+            })
     }
 
     fn track_pairs(&mut self, text: &str) {
-        let mut buffer_word = "";
-        for word in text.split_whitespace() {
-            self.word_pairs.entry((buffer_word.to_string(), word.to_string())).and_modify(|e| *e += 1).or_insert(1);
-            buffer_word = word;
-        }
+        let words: Vec<_> = text.split_whitespace().collect();
+        words.windows(2)
+            .for_each(|pair| {
+                self.word_pairs
+                    .entry((pair[0].to_string(), pair[1].to_string()))
+                    .and_modify(|count| *count += 1)
+                    .or_insert(1);
+            })
+    }
+
+    fn word_distribution(&mut self, text: &str) {
+        text.split_whitespace().for_each(|word| {
+            let word_len = word.len();
+            self.length_dist.entry(word_len)
+                .or_insert_with(Vec::new)
+                .push(word.to_string());
+        })
     }
 
     fn count_words(&mut self, text: &str) {
