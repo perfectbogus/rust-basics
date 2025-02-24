@@ -24,6 +24,28 @@ impl WordAnalytics {
     fn add_text(&mut self, text: &str) {
         // TODO: Process text and update all hashmaps
         // Count words, track pairs, record first positions
+        self.count_words(text);
+        self.track_pairs(text);
+        self.first_occurrence(text);
+    }
+
+    fn first_occurrence(&mut self, text: &str) {
+        let mut count = 0;
+        for word in text.split_whitespace() {
+            self.first_seen.insert(word.to_string(), count);
+            count += 1;
+        }
+    }
+
+    fn track_pairs(&mut self, text: &str) {
+        let mut buffer_word = "";
+        for word in text.split_whitespace() {
+            self.word_pairs.entry((buffer_word.to_string(), word.to_string())).and_modify(|e| *e += 1).or_insert(1);
+            buffer_word = word;
+        }
+    }
+
+    fn count_words(&mut self, text: &str) {
         text.split_whitespace().into_iter()
             .for_each(|word| {
                 self.word_count.entry(word.to_string())
@@ -93,6 +115,16 @@ fn main() {
     for word in "this another phrase".split_whitespace() {
         b.entry(word.to_string());
     }
-
     println!("{:?}", b);
+
+    let mut c: HashMap<(String, String), usize> = HashMap::new();
+
+    let mut buffer_word = "";
+    for word in "this is a new phrase".split_whitespace() {
+        c.entry((buffer_word.to_string(), word.to_string())).and_modify(|e| *e += 1).or_insert(1);
+        buffer_word = word;
+    }
+    println!("{:?}", c);
+
+
 }
