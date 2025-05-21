@@ -1,0 +1,3 @@
+this is an example to test this tool called simple word counter
+that will help me to improve my knowledge about how to program with
+Rust and its tools.
