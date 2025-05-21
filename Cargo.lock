@@ -54,6 +54,10 @@ name = "bad_singly_linked"
 version = "0.1.0"
 
 [[package]]
+name = "basic_management_system"
+version = "0.1.0"
+
+[[package]]
 name = "basics"
 version = "0.1.0"
 
