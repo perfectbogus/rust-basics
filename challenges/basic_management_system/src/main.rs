@@ -38,7 +38,11 @@ impl Inventory {
     }
     
     fn remove_item(&mut self, id: &str) -> Option<Item> {
-        unimplemented!()
+        if let Some(index) = self.items.iter().position(|item| item.id == id) {
+            Some(self.items.remove(index))
+        } else {
+            None
+        }
     }
     
     fn transfer_item(&mut self, dest: &mut Inventory, id: &str) -> Result<(), String> {
@@ -107,12 +111,66 @@ mod tests {
     fn get_item() {
         let mut inventory = Inventory::new();
         let item = create_item();
+
+        inventory.add_item(item);
+
+        let opt = inventory.get_item(&"abc");
+
+        assert_eq!(opt.unwrap().name, "soda".to_string());
+    }
+
+    #[test]
+    fn get_item_mut() {
+        let mut inventory = Inventory::new();
+        let new_quantity = 15;
+        let item = create_item();
+
+        inventory.add_item(item);
+
+        let mut_item = inventory.get_item_mut(&"abc").unwrap();
+        mut_item.quantity = new_quantity; // Update Quantity
+
+        let non_item = inventory.get_item(&"abc").unwrap();
+        assert_eq!(non_item.quantity, new_quantity);
+    }
+
+    #[test]
+    fn remove_item() {
+        let mut inventory = Inventory::new();
+        let item = create_item();
+
+        inventory.add_item(item);
+        inventory.remove_item(&"abc").unwrap();
+
+        assert_eq!(inventory.len(), 0);
+    }
+    
+    #[test]
+    fn transfer_item() {
+        let mut inventoryA = Inventory::new();
+        let mut inventoryB = Inventory::new();
+        let item = create_item();
         
+        inventoryA.add_item(item);
+        
+        inventoryA.transfer_item(&mut inventoryB, &"abc").unwrap();
+
+        assert_eq!(inventoryB.len(), 1);
+        assert_eq!(inventoryA.len(), 0);
+    }
+    
+    #[test]
+    fn update_quantity() {
+        let mut inventory = Inventory::new();
+        let item = create_item();
+        let new_quantity = 0;
+
         inventory.add_item(item);
         
-        let opt = inventory.get_item(&"abc");
+        inventory.update_quantity(&"abc", new_quantity).unwrap();
         
-        assert_eq!(opt.unwrap().name, "soda".to_string());
+        let item = inventory.get_item(&"abc").unwrap();
         
+        assert_eq!(item.quantity, new_quantity);
     }
 }
