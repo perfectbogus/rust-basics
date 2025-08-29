@@ -1,13 +1,15 @@
 fn main() {
-    let mut message = String::from("Hello rust");
+    let s1;
+    let s = String::from("lifetime challenge");  // This WILL be dropped!
 
-    // This function will modify the string
-    make_uppercase(&mut message);
+    {
+        let ta = TextAnalyzer { text: &s };
+        s1 = ta.text;
+    }
 
-    println!("after uppercase: {}", message);
+    println!("text: {}", s1);
 }
 
-fn make_uppercase(s: &mut String) {
-    *s = s.to_uppercase();
+struct TextAnalyzer<'a> {
+    text: &'a str,
 }
-
