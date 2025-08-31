@@ -13,6 +13,105 @@ fn main() {
 
     reference_thread_safe_shared_mutation();
 
+    simple_shared_ownership();
+
+    challenge_one_basic_immutable_sharing();
+
+    println!("### Challenge two interior mutability ###");
+    challenge_two_interior_mutability();
+
+    println!("### Challenge three Shared Mutable State ###");
+    challenge_three_shared_mutable_state();
+}
+
+fn challenge_three_shared_mutable_state() {
+    // Create a shared shopping cart (Vec<String>)
+    let cart = Rc::new(RefCell::new(Vec::<String>::new()));
+
+    let shopper1 = cart.clone();
+    let shopper2 = cart.clone();
+    let shopper3 = cart.clone();
+
+    {
+        shopper1.borrow_mut().push(String::from("apples"));
+    }
+
+    {
+        shopper2.borrow_mut().push(String::from("bananas"));
+    }
+
+    {
+        shopper3.borrow_mut().push(String::from("oranges"));
+    }
+
+    println!("Final Cart: {:?}", cart);
+
+    // Bonus: Create a function that takes any shopper and adds an item
+    add_item(shopper1, "milk".to_string());
+
+    println!("After adding milk: {:?}", cart);
+}
+
+fn add_item(shopper: Rc<RefCell<Vec<String>>>, item: String) {
+    shopper.borrow_mut().push(item);
+}
+
+
+struct BankAccount {
+    balance: RefCell<i32>,
+}
+
+impl BankAccount {
+    fn new(initial_balance: i32) -> Self {
+        BankAccount { balance: RefCell::new(initial_balance)}
+    }
+
+    fn deposit(&self, amount: i32) {
+        *self.balance.borrow_mut() += amount;
+    }
+
+    fn withdraw(&self, amount: i32) -> bool {
+        if amount < *self.balance.borrow() {
+            *self.balance.borrow_mut() -= amount;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn balance(&self) -> i32 {
+        *self.balance.borrow()
+    }
+}
+
+fn challenge_two_interior_mutability() {
+    let account = BankAccount::new(100);
+
+    account.deposit(50);
+    println!("{:?}", account.balance());
+
+    let success = account.withdraw(30);
+    println!("Withdrawal success: {}, Balance: {}", success, account.balance());
+
+    let failed = account.withdraw(200);
+    println!("Withdrawal failed with error: {}, Balance: {}", failed, account.balance());
+}
+
+fn challenge_one_basic_immutable_sharing() {
+    let book = Rc::new(String::from("The book"));
+
+    let reader1 = book.clone();
+    let reader2 = book.clone();
+    let reader3 = book.clone();
+
+    println!("reader1: {:?}", reader1);
+    println!("reader2: {:?}", reader2);
+    println!("reader3: {:?}", reader3);
+
+    println!("Reference Count: {}", Rc::strong_count(&reader1));
+}
+
+fn simple_shared_ownership() {
     let counter = Rc::new(RefCell::new(0));
 
     let c1 = counter.clone();
@@ -28,7 +127,6 @@ fn main() {
 
     // Should print: Counter value: 1
 }
-
 
 
 fn reference_thread_safe_shared_mutation() {
