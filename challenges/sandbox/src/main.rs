@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::cell::RefCell;
 fn main() {
@@ -10,7 +10,42 @@ fn main() {
     interior_mutability();
 
     reference_counted_with_mutability();
+
+    reference_thread_safe_shared_mutation();
+
+    let counter = Rc::new(RefCell::new(0));
+
+    let c1 = counter.clone();
+    let c2 = counter.clone();
+
+    {
+        let mut increment = c1.borrow_mut();
+        *increment += 1;
+    }
+
+    // Read through c2
+    println!("Counter value: {:?}", c2.borrow());
+
+    // Should print: Counter value: 1
 }
+
+
+
+fn reference_thread_safe_shared_mutation() {
+    println!("### Running reference thread safe shared mutation ###");
+    let shared_data = Arc::new(Mutex::new(vec![1, 2, 3]));
+
+    let data_clone = shared_data.clone();
+
+    let handle = thread::spawn(move || {
+        let mut data = data_clone.lock().unwrap();
+        data.push(4);
+    });
+
+    handle.join().unwrap();
+    println!("data: {:?}", shared_data.lock().unwrap());
+}
+
 
 fn reference_counted_with_mutability() {
     println!("### Running reference counted with mutability ###");
