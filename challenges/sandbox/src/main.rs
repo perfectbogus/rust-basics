@@ -55,6 +55,15 @@ impl Parent {
         self.children.borrow_mut().push(child.clone());
         child
     }
+
+    fn print_children(&self) {
+        let children = self.children.borrow();
+        println!("Parent has {} children", children.len());
+
+        for (index, _child) in children.iter().enumerate() {
+            println!("  Child {}", index + 1);
+        }
+    }
 }
 
 impl Child {
@@ -64,6 +73,37 @@ impl Child {
 }
 
 fn challenge_five_weak_references() {
+
+    let parent = Parent::new();
+    let child1 = parent.add_child();
+    let child2 = parent.add_child();
+
+    parent.print_children();
+
+    if let Some(p) = child1.get_parent() {
+        println!("Child has {} siblings", p.children.borrow().len() - 1);
+    } else {
+        println!("Child's parent is gone!");
+    }
+
+    {
+        let another_child = {
+            let temp_parent = Parent::new();
+            let child = temp_parent.add_child();
+            child
+        };
+
+        // Can the child still access its parent?
+        if let Some(p) = another_child.get_parent() {
+            println!("Parent still alive with {} children", p.children.borrow().len());
+        } else {
+            println!("Parent was dropped - weak reference returned None!");
+        }
+    }
+
+    if let Some(p) = child1.get_parent() {
+        println!("Original parent stil has {} children", p.children.borrow().len());
+    }
 
 }
 
