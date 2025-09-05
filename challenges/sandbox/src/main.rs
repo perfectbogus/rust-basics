@@ -1,7 +1,8 @@
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::cell::RefCell;
+use std::cell::{BorrowError, Ref, RefCell};
+
 fn main() {
     reference_counted();
 
@@ -22,6 +23,72 @@ fn main() {
 
     println!("### Challenge three Shared Mutable State ###");
     challenge_three_shared_mutable_state();
+
+    println!("### Challenge four: Error Handling with RefCell ###");
+    challenge_four_error_handling_refcell();
+
+    println!("### Challenge five: weak references ###");
+    challenge_five_weak_references();
+
+}
+
+struct Parent {
+    children: RefCell<Vec<Rc<Child>>>,
+}
+
+struct Child {
+    parent: Weak<Parent>,
+}
+
+impl Parent {
+    fn new() -> Rc<Self> {
+        Rc::new(Parent {
+            children: RefCell::new(vec![]),
+        })
+    }
+
+    fn add_child(self: &Rc<Self>) -> Rc<Child> {
+        let child = Rc::new(Child {
+            parent: Rc::downgrade(self)
+        });
+
+        self.children.borrow_mut().push(child.clone());
+        child
+    }
+}
+
+impl Child {
+    fn get_parent(&self) -> Option<Rc<Parent>> {
+        self.parent.upgrade()
+    }
+}
+
+fn challenge_five_weak_references() {
+
+}
+
+
+fn challenge_four_error_handling_refcell() {
+    let data = RefCell::new(vec![1, 2, 3]);
+
+    // this should work fine
+    {
+        let borrowed = data.borrow();
+        println!("Data: {:?}", borrowed);
+    }
+
+    let _immutable_ref = data.borrow();
+
+    match data.try_borrow_mut() {
+        Ok(mut data) => {
+            data.push(4);
+            println!("Successfully modified: {:?}", *data);
+        }
+        Err(_) => {
+            println!("Could not get mutable borrow - already borrowed immutably!");
+        }
+    }
+
 }
 
 fn challenge_three_shared_mutable_state() {
