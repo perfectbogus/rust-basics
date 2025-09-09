@@ -6,6 +6,171 @@ use std::fmt;
 fn main() {
     println!("hello world");
 }
+
+// EASY CHALLENGE 3: Basic error propagation with ?
+// Goal: Learn to use ? operator effectively
+mod easy_challenge_3 {
+    use super::*;
+
+    // TODO: Read file and count lines
+    fn count_lines_in_file(filename: &str) -> Result<usize, io::Error> {
+        // Read file and count number of lines
+        // Use ? operator for error propagation
+        unimplemented!()
+    }
+
+    // TODO: Parse config from file
+    fn parse_config_number(filename: &str) -> Result<i32, Box<dyn std::error::Error>> {
+        // Read file, parse first line as integer
+        // Handle both IO errors and parse errors
+        unimplemented!()
+    }
+
+    // TODO: Chain multiple fallible operations
+    fn process_numbers_file(filename: &str) -> Result<f64, Box<dyn std::error::Error>> {
+        // Read file, parse each line as number, return average
+        // Use ? operator throughout
+        unimplemented!()
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+        use std::fs;
+
+        #[test]
+        fn test_count_lines() {
+            // Create test file
+            fs::write("test_lines.txt", "line1\nline2\nline3").unwrap();
+
+            let count = count_lines_in_file("test_lines.txt").unwrap();
+            assert_eq!(count, 3);
+
+            // Clean up
+            fs::remove_file("test_lines.txt").ok();
+
+            // Test non-existent file
+            assert!(count_lines_in_file("nonexistent.txt").is_err());
+        }
+    }
+}
+
+mod easy_challenge_2 {
+    use super::*;
+
+    #[derive(Debug, PartialEq)]
+    struct Person {
+        name: String,
+        age: u32,
+        email: Option<String>,
+    }
+
+    impl Person {
+        fn new(name: String, age: u32, email: Option<String>) -> Self {
+            Person { name, age, email }
+        }
+
+        // TODO: Get email domain if email exists
+        fn email_domain(&self) -> Option<String> {
+            // Extract domain from email (part after @)
+            // Return None if no email or invalid format
+            match &self.email {
+                None => None,
+                Some(email) =>  {
+                    if let Some(domain) = email.split("@").last() {
+                        Some(domain.to_string())
+                    } else {
+                        None
+                    }
+                },
+            }
+        }
+
+        fn email_domain_idiomatic(&self) -> Option<String> {
+            self.email.as_ref()?
+                .split("@")
+                .nth(1)
+                .map(|s| s.to_string())
+        }
+
+        // TODO: Check if person is adult with email
+        fn is_adult_with_email(&self) -> bool {
+            // Return true only if age >= 18 AND has email
+            if self.age >= 18 && self.email.is_some() {
+                true
+            } else {
+                false
+            }
+        }
+
+        fn is_adult_with_email_improved(&self) -> bool {
+            self.age >= 18 && self.email.is_some()
+        }
+
+        // TODO: Get display name or default
+        fn display_name(&self) -> String {
+            // Return name, but if name is empty, return "Anonymous"
+            if self.name.is_empty() {
+                "Anonymous".to_string()
+            } else {
+                self.name.clone()
+            }
+        }
+    }
+
+    // TODO: Find person by email in a list
+    fn find_person_by_email<'a>(people: &'a[Person], email: &str) -> Option<&'a Person> {
+        // Find person with matching email
+        for p in people {
+            if let Some(p_email) = p.email.clone() {
+                if p_email == email {
+                    return Some(p);
+                }
+            }
+        }
+        None
+    }
+
+    fn find_person_by_email_improved<'a>(people: &'a [Person], email: &str) -> Option<&'a Person> {
+        people.iter().find(|person| {
+            person.email.as_ref() == Some(&email.to_string())
+        })
+    }
+
+    fn find_person_by_email_elegant<'a>(people: &'a [Person], email: &str) -> Option<&'a Person> {
+        people.iter().find(|person| {
+            person.email.as_deref() == Some(email)
+        })
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn test_email_domain() {
+            let person = Person::new("Alice".to_string(), 25, Some("alice@example.com".to_string()));
+            assert_eq!(person.email_domain(), Some("example.com".to_string()));
+
+            let no_email = Person::new("Bob".to_string(), 30, None);
+            assert_eq!(no_email.email_domain(), None);
+        }
+
+        #[test]
+        fn test_adult_with_email() {
+            let adult_with_email = Person::new("Alice".to_string(), 25, Some("alice@example.com".to_string()));
+            assert!(adult_with_email.is_adult_with_email());
+
+            let minor_with_email = Person::new("Charlie".to_string(), 16, Some("charlie@example.com".to_string()));
+            assert!(!minor_with_email.is_adult_with_email());
+
+            let adult_no_email = Person::new("David".to_string(), 30, None);
+            assert!(!adult_no_email.is_adult_with_email());
+        }
+    }
+}
+
+
 // =============================================================================
 // EASY CHALLENGES (1-3): Basic Result<T, E> and Option<T>
 // =============================================================================
