@@ -81,19 +81,10 @@ mod medium_challenge_5 {
         // Return ValidationError if no numbers found
         let numbers = process_number_file(filename)?;
 
-        if numbers.is_empty() {
-            return Err(FileProcessingError::ValidationError("No valid numbers were found".to_string()))
-        }
-
-        let mut max = 0;
-
-        for n in numbers.iter() {
-            if n > &max {
-                max = *n;
-            }
-        }
-
-        Ok(max)
+        numbers.iter()
+            .max()
+            .copied()
+            .ok_or(FileProcessingError::ValidationError("No maximum found".to_string()))
     }
 
     #[cfg(test)]
@@ -113,6 +104,91 @@ mod medium_challenge_5 {
 
             // Clean up
             fs::remove_file("test_numbers.txt").ok();
+        }
+
+        #[test]
+        fn test_io_error() {
+            let result = process_number_file("nonexistent_file.txt");
+
+            assert!(result.is_err());
+            match result.unwrap_err() {
+                FileProcessingError::IoError(_) => {},
+                other => panic!("Expected IoError, get: {:?}", other)
+            }
+        }
+
+        #[test]
+        fn test_validation_error() {
+            fs::write("test_validation.txt", "10\n-5\n30").unwrap();
+
+            let result = process_number_file("test_validation.txt");
+            assert!(result.is_err());
+            match result.unwrap_err() {
+                FileProcessingError::ValidationError(msg) => {
+                    assert!(msg.contains("positive"));
+                },
+                other => panic!("Expected ValidationError, got: {:?}", other)
+            }
+
+            fs::remove_file("test_validation.txt").ok();
+        }
+
+        #[test]
+        fn test_empty_file_error() {
+            fs::write("test_empty.txt", "").unwrap();
+
+            let result = process_number_file("test_empty.txt");
+            assert!(result.is_err());
+
+            match result.unwrap_err() {
+                FileProcessingError::EmptyFile => {},
+                other => panic!("Expected EmptyFileError, got : {:?}", other)
+            }
+
+            fs::remove_file("test_empty.txt").ok();
+        }
+
+        #[test]
+        fn test_whitespace_only_files() {
+            fs::write("test_whitespace.txt", "   \n\t\n  ").unwrap();
+
+            let result = process_number_file("test_whitespace.txt");
+            assert!(result.is_err());
+
+            match result.unwrap_err() {
+                FileProcessingError::EmptyFile => {},
+                other => panic!("Expected EmptyFileError, got {:?}", other)
+            }
+
+            fs::remove_file("test_whitespace.txt").ok();
+        }
+
+        #[test]
+        fn test_zero_validation() {
+            fs::write("test_zero.txt", "10\n0\n30").unwrap();
+
+            let result = process_number_file("test_zero.txt");
+            assert!(result.is_err());
+
+            match result.unwrap_err() {
+                FileProcessingError::ValidationError(msg) => assert!(msg.contains("positive")),
+                other => panic!("Expected ValidationError, got {:?}", other)
+            }
+        }
+
+        #[test]
+        fn test_error_display_messages() {
+            let io_error = FileProcessingError::IoError(
+                io::Error::new(io::ErrorKind::NotFound, "File not found")
+            );
+            assert!(format!("{}", io_error).contains("I/O error"));
+
+            let validation_error = FileProcessingError::ValidationError("Test message".to_string());
+            assert!(format!("{}", validation_error).contains("Validation error"));
+
+            let empty_err = FileProcessingError::EmptyFile;
+            assert_eq!(format!("{}", empty_err), "Empty file")
+
         }
     }
 }
