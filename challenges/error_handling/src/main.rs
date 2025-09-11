@@ -6,6 +6,116 @@ use std::fmt;
 fn main() {
     println!("hello world");
 }
+// MEDIUM CHALLENGE 5: Error conversion and From trait
+// Goal: Automatic error conversion between different error types
+mod medium_challenge_5 {
+    use super::*;
+
+    #[derive(Debug)]
+    enum FileProcessingError {
+        IoError(io::Error),
+        ParseError(ParseIntError),
+        ValidationError(String),
+        EmptyFile,
+    }
+
+    impl fmt::Display for FileProcessingError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            // TODO: Implement Display
+            match self {
+                FileProcessingError::IoError(e) => write!(f, "I/O error: {}", e),
+                FileProcessingError::ParseError(e) => write!(f, "Parse error: {}", e),
+                FileProcessingError::ValidationError(e) => write!(f, "Validation error: {}", e),
+                FileProcessingError::EmptyFile => write!(f, "Empty file"),
+            }
+        }
+    }
+
+    impl std::error::Error for FileProcessingError {}
+
+    // TODO: Implement From traits for automatic conversion
+    impl From<io::Error> for FileProcessingError {
+        fn from(error: io::Error) -> Self {
+            // TODO: Convert io::Error to FileProcessingError
+            FileProcessingError::IoError(error)
+        }
+    }
+
+    impl From<ParseIntError> for FileProcessingError {
+        fn from(error: ParseIntError) -> Self {
+            // TODO: Convert ParseIntError to FileProcessingError
+            FileProcessingError::ParseError(error)
+        }
+    }
+
+    fn process_number_file(filename: &str) -> Result<Vec<i32>, FileProcessingError> {
+        // TODO: Read file, parse each line as i32, validate all numbers are positive
+        // Use ? operator - errors should automatically convert
+        let contents = fs::read_to_string(filename)?;
+        let mut numbers = Vec::new();
+
+        for line in contents.lines() {
+            if line.trim().is_empty() {
+                continue;
+            }
+
+            let num = line.parse::<i32>()?;
+
+            if num <= 0 {
+                return Err(FileProcessingError::ValidationError(
+                    "All numbers must be positive".to_string())
+                );
+            }
+            numbers.push(num);
+        }
+
+        if numbers.is_empty() {
+            return Err(FileProcessingError::EmptyFile)
+        }
+
+        Ok(numbers)
+    }
+
+    fn find_max_in_file(filename: &str) -> Result<i32, FileProcessingError> {
+        // TODO: Use process_number_file and find maximum
+        // Return ValidationError if no numbers found
+        let numbers = process_number_file(filename)?;
+
+        if numbers.is_empty() {
+            return Err(FileProcessingError::ValidationError("No valid numbers were found".to_string()))
+        }
+
+        let mut max = 0;
+
+        for n in numbers.iter() {
+            if n > &max {
+                max = *n;
+            }
+        }
+
+        Ok(max)
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn test_error_conversion() {
+            // Test will create files and test error conversion
+            fs::write("test_numbers.txt", "10\n20\n30").unwrap();
+
+            let numbers = process_number_file("test_numbers.txt").unwrap();
+            assert_eq!(numbers, vec![10, 20, 30]);
+
+            let max = find_max_in_file("test_numbers.txt").unwrap();
+            assert_eq!(max, 30);
+
+            // Clean up
+            fs::remove_file("test_numbers.txt").ok();
+        }
+    }
+}
 
 // =============================================================================
 // MEDIUM CHALLENGES (4-6): Custom errors and advanced patterns
