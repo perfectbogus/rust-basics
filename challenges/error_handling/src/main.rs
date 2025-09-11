@@ -35,7 +35,15 @@ mod easy_challenge_3 {
     fn process_numbers_file(filename: &str) -> Result<f64, Box<dyn std::error::Error>> {
         // Read file, parse each line as number, return average
         // Use ? operator throughout
-
+        let contents = fs::read_to_string(filename)?;
+        let mut sum = 0.0;
+        let mut count = 0;
+        for line in contents.lines() {
+            let parsed: f64 = line.parse()?;
+            sum += parsed;
+            count += 1;
+        }
+        Ok(sum / count as f64)
     }
 
     #[cfg(test)]
