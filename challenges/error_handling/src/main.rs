@@ -16,21 +16,26 @@ mod easy_challenge_3 {
     fn count_lines_in_file(filename: &str) -> Result<usize, io::Error> {
         // Read file and count number of lines
         // Use ? operator for error propagation
-        unimplemented!()
+        let contents = fs::read_to_string(filename)?;
+        let line_count = contents.lines().count();
+        Ok(line_count)
     }
 
     // TODO: Parse config from file
     fn parse_config_number(filename: &str) -> Result<i32, Box<dyn std::error::Error>> {
         // Read file, parse first line as integer
         // Handle both IO errors and parse errors
-        unimplemented!()
+        let contents = fs::read_to_string(filename)?;
+        let first_line = contents.lines().next().ok_or("Empty file")?;
+        let number = first_line.parse::<i32>()?;
+        Ok(number)
     }
 
     // TODO: Chain multiple fallible operations
     fn process_numbers_file(filename: &str) -> Result<f64, Box<dyn std::error::Error>> {
         // Read file, parse each line as number, return average
         // Use ? operator throughout
-        unimplemented!()
+
     }
 
     #[cfg(test)]
