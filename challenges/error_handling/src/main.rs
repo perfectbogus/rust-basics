@@ -7,6 +7,117 @@ fn main() {
     println!("hello world");
 }
 
+// =============================================================================
+// MEDIUM CHALLENGES (4-6): Custom errors and advanced patterns
+// =============================================================================
+
+// MEDIUM CHALLENGE 4: Custom Error Types
+// Goal: Create proper error enums with Display and Error traits
+mod medium_challenge_4 {
+    use super::*;
+
+    #[derive(Debug)]
+    enum CalculatorError {
+        DivisionByZero,
+        InvalidOperation(String),
+        NumberTooLarge(f64),
+        ParseError(String),
+    }
+
+    impl fmt::Display for CalculatorError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            // TODO: Implement user-friendly error messages
+            match self {
+                CalculatorError::DivisionByZero => write!(f, "division by zero"),
+                CalculatorError::InvalidOperation(op) => write!(f, "invalid operation: {}", op),
+                CalculatorError::NumberTooLarge(n) => write!(f, "number is too large: {}", n),
+                CalculatorError::ParseError(error) => write!(f, "parse error: {}", error),
+            }
+        }
+    }
+
+    impl std::error::Error for CalculatorError {}
+
+    struct Calculator;
+
+    impl Calculator {
+        fn new() -> Self {
+            Calculator
+        }
+
+        fn divide(&self, a: f64, b: f64) -> Result<f64, CalculatorError> {
+            // TODO: Implement with proper error handling
+            if b == 0.0 {
+                Err(CalculatorError::DivisionByZero)
+            } else {
+                Ok(a / b)
+            }
+        }
+
+        fn parse_and_add(&self, a: &str, b: &str) -> Result<f64, CalculatorError> {
+            // TODO: Parse both strings and add them
+            // Handle parse errors appropriately
+            let a_parsed = a.parse::<f64>();
+            let b_parsed = b.parse::<f64>();
+
+            match (a_parsed, b_parsed) {
+                (Ok(a), Ok(b)) => Ok(a + b),
+                (Err(a), _) => Err(CalculatorError::ParseError("Error parsing A".to_string())),
+                (_, Err(b)) => Err(CalculatorError::ParseError("Error parsing B".to_string())),
+            }
+        }
+
+        fn parse_and_add_improved(&self, a: &str, b: &str) -> Result<f64, CalculatorError> {
+            let a_parsed = a.parse::<f64>()
+                .map_err(|_| CalculatorError::ParseError(format!("Error parsing A: {}", a)))?;
+            let b_parsed = b.parse::<f64>()
+                .map_err(|_| CalculatorError::ParseError(format!("Error parsing B: {}", b)))?;
+
+            Ok(a_parsed + b_parsed)
+        }
+
+        fn factorial(&self, n: u32) -> Result<u64, CalculatorError> {
+            // TODO: Calculate factorial, but error if result would be too large
+            // Consider n > 20 as too large
+            if n > 20 {
+                return Err(CalculatorError::NumberTooLarge(n as f64));
+            }
+
+            let mut count: u64 = 1;
+
+            for i in 1..=n {
+                count *= i as u64;
+            }
+
+            Ok(count)
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn test_calculator_errors() {
+            let calc = Calculator::new();
+
+            // Division by zero
+            assert!(matches!(calc.divide(10.0, 0.0), Err(CalculatorError::DivisionByZero)));
+
+            // Parse error
+            assert!(matches!(calc.parse_and_add("10", "abc"), Err(CalculatorError::ParseError(_))));
+
+            // Number too large
+            assert!(matches!(calc.factorial(25), Err(CalculatorError::NumberTooLarge(_))));
+
+            // Success cases
+            assert_eq!(calc.divide(10.0, 2.0).unwrap(), 5.0);
+            assert_eq!(calc.parse_and_add("10", "20").unwrap(), 30.0);
+        }
+    }
+}
+
+
 // EASY CHALLENGE 3: Basic error propagation with ?
 // Goal: Learn to use ? operator effectively
 mod easy_challenge_3 {
