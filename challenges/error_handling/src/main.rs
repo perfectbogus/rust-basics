@@ -6,6 +6,81 @@ use std::fmt;
 fn main() {
     println!("hello world");
 }
+
+// MEDIUM CHALLENGE 6: Error handling in iterators and combinators
+// Goal: Handle errors in functional programming style
+mod medium_challenge_6 {
+    use super::*;
+
+    #[derive(Debug)]
+    enum DataProcessingError {
+        InvalidFormat(String),
+        OutOfRange(i32),
+        ProcessingFailed(String),
+    }
+
+    impl fmt::Display for DataProcessingError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            // TODO: Implement Display
+            match self {
+                DataProcessingError::InvalidFormat(msg) => write!(f, "Invalid input format: {}", msg),
+                DataProcessingError::OutOfRange(n) => write!(f, "Out of range: {}", n),
+                DataProcessingError::ProcessingFailed(msg) => write!(f, "{}", msg),
+            }
+        }
+    }
+
+    impl std::error::Error for DataProcessingError {}
+
+    // TODO: Process list of strings, parse to numbers, filter and transform
+    fn process_data_pipeline(input: Vec<&str>) -> Result<Vec<i32>, DataProcessingError> {
+        // 1. Parse each string to i32
+        // 2. Filter out numbers not in range 1-100
+        // 3. Square each number
+        // 4. Return error if any step fails
+        // Use iterator methods like collect(), map(), filter()
+        unimplemented!()
+    }
+
+    // TODO: Batch process with partial success
+    fn batch_process(inputs: Vec<&str>) -> (Vec<i32>, Vec<DataProcessingError>) {
+        // Process each input, collect successes and errors separately
+        // Don't stop on first error - process all inputs
+        unimplemented!()
+    }
+
+    // TODO: Find first valid result
+    fn find_first_valid(inputs: Vec<&str>) -> Option<i32> {
+        // Try to parse each input, return first successful parse
+        // Return None if all fail
+        unimplemented!()
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn test_data_pipeline() {
+            let input = vec!["10", "20", "30"];
+            let result = process_data_pipeline(input).unwrap();
+            assert_eq!(result, vec![100, 400, 900]); // 10², 20², 30²
+
+            let invalid_input = vec!["10", "abc", "30"];
+            assert!(process_data_pipeline(invalid_input).is_err());
+        }
+
+        #[test]
+        fn test_batch_process() {
+            let input = vec!["10", "abc", "20", "xyz", "30"];
+            let (successes, errors) = batch_process(input);
+            assert_eq!(successes.len(), 3); // 10, 20, 30
+            assert_eq!(errors.len(), 2);    // abc, xyz
+        }
+    }
+}
+
+
 // MEDIUM CHALLENGE 5: Error conversion and From trait
 // Goal: Automatic error conversion between different error types
 mod medium_challenge_5 {
