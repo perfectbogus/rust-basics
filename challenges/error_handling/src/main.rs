@@ -6,6 +6,133 @@ use std::fmt;
 fn main() {
     println!("hello world");
 }
+// =============================================================================
+// HARD CHALLENGES (7-9): Advanced error handling patterns
+// =============================================================================
+
+// HARD CHALLENGE 7: Error recovery and retry mechanisms
+// Goal: Implement sophisticated error handling with recovery
+mod hard_challenge_7 {
+    use std::cmp::min;
+    use super::*;
+    use std::time::Duration;
+
+    #[derive(Debug)]
+    enum NetworkError {
+        Timeout,
+        ConnectionRefused,
+        InvalidResponse(String),
+        RateLimited { retry_after: Duration },
+    }
+
+    impl fmt::Display for NetworkError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            // TODO: Implement Display
+            match self {
+                NetworkError::Timeout => write!(f, "Timeout"),
+                NetworkError::ConnectionRefused => write!(f, "Connection refused"),
+                NetworkError::InvalidResponse(msg) => write!(f, "InvalidResponse: {}", msg),
+                NetworkError::RateLimited { retry_after } => write!(f, "RateLimited: {:?}", retry_after),
+            }
+        }
+    }
+
+    impl std::error::Error for NetworkError {}
+
+    struct RetryConfig {
+        max_attempts: usize,
+        base_delay: Duration,
+        max_delay: Duration,
+    }
+
+    impl Default for RetryConfig {
+        fn default() -> Self {
+            RetryConfig {
+                max_attempts: 3,
+                base_delay: Duration::from_millis(100),
+                max_delay: Duration::from_secs(5),
+            }
+        }
+    }
+
+    // TODO: Implement retry mechanism with exponential backoff
+    fn retry_with_backoff<F, T>(
+        mut operation: F,
+        config: RetryConfig,
+    ) -> Result<T, NetworkError>
+    where
+        F: FnMut() -> Result<T, NetworkError>,
+    {
+        // Implement retry logic:
+        // 1. Try operation
+        // 2. If fails, wait (exponential backoff)
+        // 3. Retry up to max_attempts
+        // 4. Handle special case: RateLimited error should use its retry_after
+        for attempt in 0..config.max_attempts {
+            return match operation() {
+                Ok(result) => Ok(result),
+                Err(NetworkError::RateLimited { retry_after }) => {
+                    if attempt + 1 < config.max_attempts {
+                        mock_sleep(retry_after);
+                        continue;
+                    }
+                    Err(NetworkError::RateLimited { retry_after })
+                },
+                Err(e) => {
+                    if attempt + 1 < config.max_attempts {
+                        let delay = config.base_delay * 2_u32.pow(attempt as u32);
+                        let capped_delay = min(delay, config.max_delay);
+                        mock_sleep(capped_delay);
+                        continue;
+                    }
+                    Err(e)
+                }
+            }
+        }
+
+        unreachable!()
+    }
+
+    fn mock_sleep(duration: Duration) {
+        println!("Sleeping for {:?}", duration);
+    }
+
+    // TODO: Implement fallback mechanism
+    fn with_fallback<F1, F2, T>(
+        primary: F1,
+        fallback: F2,
+    ) -> Result<T, NetworkError>
+    where
+        F1: Fn() -> Result<T, NetworkError>,
+        F2: Fn() -> Result<T, NetworkError>,
+    {
+        // Try primary operation, if it fails, try fallback
+        unimplemented!()
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn test_retry_mechanism() {
+            let mut attempt_count = 0;
+
+            let operation = || {
+                attempt_count += 1;
+                if attempt_count < 4 {
+                    Err(NetworkError::Timeout)
+                } else {
+                    Ok("Success")
+                }
+            };
+
+            let result = retry_with_backoff(operation, RetryConfig::default());
+            assert!(result.is_ok());
+            assert_eq!(attempt_count, 4);
+        }
+    }
+}
 
 // MEDIUM CHALLENGE 6: Error handling in iterators and combinators
 // Goal: Handle errors in functional programming style
@@ -730,6 +857,187 @@ mod easy_challenge_1 {
             assert_eq!(calculate_average(vec!["10", "20", "30"]).unwrap(), 20.0);
             assert!(calculate_average(vec!["10", "abc", "30"]).is_err());
             assert!(calculate_average(vec![]).is_err());
+        }
+    }
+}
+
+
+// HARD CHALLENGE 8: Error context and error chaining
+// Goal: Build rich error context with source chains
+mod hard_challenge_8 {
+    use super::*;
+
+    #[derive(Debug)]
+    struct ErrorContext {
+        message: String,
+        source: Option<Box<dyn std::error::Error + Send + Sync>>,
+        location: String,
+    }
+
+    impl fmt::Display for ErrorContext {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(f, "{} at {}", self.message, self.location)
+        }
+    }
+
+    // impl std::error::Error for ErrorContext {
+    //     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+    //         self.source.as_ref().map(|e| e.as_ref())
+    //     }
+    // }
+
+    // TODO: Implement error context builder
+    trait ErrorExt<T> {
+        fn with_context<F>(self, f: F) -> Result<T, ErrorContext>
+        where
+            F: FnOnce() -> String;
+
+        fn with_location(self, location: &str) -> Result<T, ErrorContext>;
+    }
+
+    impl<T, E> ErrorExt<T> for Result<T, E>
+    where
+        E: std::error::Error + Send + Sync + 'static,
+    {
+        fn with_context<F>(self, f: F) -> Result<T, ErrorContext>
+        where
+            F: FnOnce() -> String,
+        {
+            // TODO: Implement context addition
+            unimplemented!()
+        }
+
+        fn with_location(self, location: &str) -> Result<T, ErrorContext> {
+            // TODO: Implement location addition
+            unimplemented!()
+        }
+    }
+
+    // TODO: Complex operation with rich error context
+    fn complex_file_operation(filename: &str) -> Result<String, ErrorContext> {
+        // Chain multiple operations, each adding context
+        // Read file -> Parse JSON -> Extract field -> Validate
+        unimplemented!()
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn test_error_context() {
+            let result = complex_file_operation("nonexistent.json");
+            assert!(result.is_err());
+
+            // Error should have rich context chain
+            let err = result.unwrap_err();
+            println!("Error: {}", err);
+
+            // Should be able to walk the error chain
+            // let mut source = err.source();
+            // while let Some(err) = source {
+            //     println!("Caused by: {}", err);
+            //     source = err.source();
+            // }
+        }
+    }
+}
+
+// HARD CHALLENGE 9: Error handling in async/concurrent contexts
+// Goal: Handle errors across async boundaries and threads
+mod hard_challenge_9 {
+    use super::*;
+    use std::sync::Arc;
+    use std::thread;
+
+    #[derive(Debug)]
+    enum ConcurrentError {
+        ThreadPanic(String),
+        Timeout,
+        AggregateError(Vec<Box<dyn std::error::Error + Send + Sync>>),
+        PartialFailure { successes: usize, failures: usize },
+    }
+
+    impl fmt::Display for ConcurrentError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            // TODO: Implement Display
+            unimplemented!()
+        }
+    }
+
+    impl std::error::Error for ConcurrentError {}
+
+    // TODO: Execute operations in parallel, collect all errors
+    fn parallel_process<T, F>(
+        inputs: Vec<T>,
+        operation: F,
+    ) -> Result<Vec<T>, ConcurrentError>
+    where
+        T: Send + 'static + Clone,
+        F: Fn(T) -> Result<T, Box<dyn std::error::Error + Send + Sync>> + Send + Sync + 'static,
+    {
+        // Process inputs in parallel threads
+        // If any fail, collect all errors and return AggregateError
+        // If all succeed, return all results
+        unimplemented!()
+    }
+
+    // TODO: Race multiple operations, return first success or all errors
+    fn race_operations<T, F>(
+        operations: Vec<F>,
+    ) -> Result<T, ConcurrentError>
+    where
+        T: Send + 'static,
+        F: Fn() -> Result<T, Box<dyn std::error::Error + Send + Sync>> + Send + 'static,
+    {
+        // Run all operations concurrently
+        // Return first successful result
+        // If all fail, return AggregateError with all failures
+        unimplemented!()
+    }
+
+    // TODO: Partial success handler
+    fn batch_process_tolerant<T, F>(
+        inputs: Vec<T>,
+        operation: F,
+        min_success_rate: f64,
+    ) -> Result<Vec<T>, ConcurrentError>
+    where
+        T: Send + 'static + Clone,
+        F: Fn(T) -> Result<T, Box<dyn std::error::Error + Send + Sync>> + Send + Sync + 'static,
+    {
+        // Process all inputs, allow some failures
+        // Return success if success_rate >= min_success_rate
+        // Otherwise return PartialFailure error
+        unimplemented!()
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn test_parallel_processing() {
+            let inputs = vec![1, 2, 3, 4, 5];
+
+            let operation = |x: i32| -> Result<i32, Box<dyn std::error::Error + Send + Sync>> {
+                if x == 3 {
+                    Err("Failed on 3".into())
+                } else {
+                    Ok(x * 2)
+                }
+            };
+
+            let result = parallel_process(inputs, operation);
+            assert!(result.is_err());
+
+            // Should contain aggregate error with the failure
+            match result.unwrap_err() {
+                ConcurrentError::AggregateError(errors) => {
+                    assert_eq!(errors.len(), 1);
+                }
+                _ => panic!("Expected AggregateError"),
+            }
         }
     }
 }
