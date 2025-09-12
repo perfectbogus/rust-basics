@@ -40,21 +40,63 @@ mod medium_challenge_6 {
         // 3. Square each number
         // 4. Return error if any step fails
         // Use iterator methods like collect(), map(), filter()
-        unimplemented!()
+        input.iter()
+            .map(|s| {
+                s.parse::<i32>().map_err(|_| DataProcessingError::InvalidFormat(s.to_string()))
+            })
+            .map(|result| {
+                result.and_then(|n| {
+                    if n >= 1 && n <= 100 {
+                        Ok(n*n)
+                    } else {
+                        Err(DataProcessingError::OutOfRange(n))
+                    }
+                })
+            })
+            .collect()
     }
 
     // TODO: Batch process with partial success
     fn batch_process(inputs: Vec<&str>) -> (Vec<i32>, Vec<DataProcessingError>) {
         // Process each input, collect successes and errors separately
         // Don't stop on first error - process all inputs
-        unimplemented!()
+        let mut successes = Vec::new();
+        let mut errors = Vec::new();
+        inputs.iter().for_each(|s| {
+            match s.parse::<i32>() {
+                Ok(n) => successes.push(n),
+                Err(e) => errors.push(DataProcessingError::InvalidFormat(e.to_string()))
+            }
+        });
+        (successes, errors)
+    }
+
+    fn batch_process_functional(inputs: Vec<&str>) -> (Vec<i32>, Vec<DataProcessingError>) {
+        let results: Vec<_> = inputs.iter()
+            .map(|s| s.parse::<i32>().map_err(|e| DataProcessingError::InvalidFormat(e.to_string())))
+            .collect();
+
+        let mut successes = Vec::new();
+        let mut errors = Vec::new();
+
+        for result in results {
+            match result {
+                Ok(n) => { successes.push(n); }
+                Err(e) => { errors.push(e); }
+            }
+        }
+
+        (successes, errors)
     }
 
     // TODO: Find first valid result
     fn find_first_valid(inputs: Vec<&str>) -> Option<i32> {
         // Try to parse each input, return first successful parse
         // Return None if all fail
-        unimplemented!()
+        inputs.iter()
+            .map(|s| s.parse::<i32>())
+            .find(|result| result.is_ok())
+            .map(|result| result.unwrap())
     }
 
     #[cfg(test)]
@@ -70,6 +112,48 @@ mod medium_challenge_6 {
             let invalid_input = vec!["10", "abc", "30"];
             assert!(process_data_pipeline(invalid_input).is_err());
         }
+        #[test]
+        fn test_playground() {
+            let input = vec!["10", "20", "30", "10"];
+            let map_one = &input.iter()
+                .map(
+                    |s| s.parse::<i32>().map_err(|_| DataProcessingError::InvalidFormat(s.to_string()))
+                ).collect::<Result<Vec<i32>, _>>();
+
+            println!("{:?}", map_one);
+
+            let map_two = &input.iter()
+                .map(|s| {
+                    s.parse::<i32>()
+                        .map_err(|_| DataProcessingError::InvalidFormat(s.to_string()))
+                })
+                .map(|result| {
+                    result.and_then(|n| {
+                        if n >= 1 && n <= 100 {
+                            Ok(n*n)
+                        } else {
+                            Err(DataProcessingError::OutOfRange(n))
+                        }
+                    })
+                })
+                .collect::<Result<Vec<i32>, _>>();
+
+            println!("{:?}", map_two);
+        }
+
+        #[test]
+        fn test_invalid_format_input() {
+            let input = vec!["10", "20", "30", "ErrorFormat"];
+
+            let result = process_data_pipeline(input);
+
+            assert!(result.is_err());
+
+            match result.unwrap_err() {
+                DataProcessingError::InvalidFormat(e) => assert!(e.contains("Format")),
+                others => panic!("Invalid format expected, got {}", others)
+            }
+        }
 
         #[test]
         fn test_batch_process() {
@@ -77,6 +161,14 @@ mod medium_challenge_6 {
             let (successes, errors) = batch_process(input);
             assert_eq!(successes.len(), 3); // 10, 20, 30
             assert_eq!(errors.len(), 2);    // abc, xyz
+        }
+
+        #[test]
+        fn test_find_first_valid() {
+            let input = vec!["10", "20", "30", "ErrorFormat"];
+            let result = find_first_valid(input);
+
+            assert_eq!(result, Some(10));
         }
     }
 }
