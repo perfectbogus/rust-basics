@@ -48,7 +48,7 @@ mod hard_challenge_7 {
     impl Default for RetryConfig {
         fn default() -> Self {
             RetryConfig {
-                max_attempts: 3,
+                max_attempts: 10,
                 base_delay: Duration::from_millis(100),
                 max_delay: Duration::from_secs(5),
             }
@@ -116,11 +116,12 @@ mod hard_challenge_7 {
 
         #[test]
         fn test_retry_mechanism() {
+            let attempts = 4;
             let mut attempt_count = 0;
 
             let operation = || {
                 attempt_count += 1;
-                if attempt_count < 4 {
+                if attempt_count < attempts {
                     Err(NetworkError::Timeout)
                 } else {
                     Ok("Success")
@@ -129,7 +130,7 @@ mod hard_challenge_7 {
 
             let result = retry_with_backoff(operation, RetryConfig::default());
             assert!(result.is_ok());
-            assert_eq!(attempt_count, 4);
+            assert_eq!(attempt_count, attempts);
         }
     }
 }
