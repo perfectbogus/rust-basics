@@ -107,7 +107,10 @@ mod hard_challenge_7 {
         F2: Fn() -> Result<T, NetworkError>,
     {
         // Try primary operation, if it fails, try fallback
-        unimplemented!()
+        match primary() {
+            Ok(result) => Ok(result),
+            Err(_) => fallback()
+        }
     }
 
     #[cfg(test)]
@@ -132,7 +135,17 @@ mod hard_challenge_7 {
             assert!(result.is_ok());
             assert_eq!(attempt_count, attempts);
         }
+
+        #[test]
+        fn test_fallback_mechanism() {
+            let primary_fails = || Err(NetworkError::Timeout);
+            let fallback_succeeds = || Ok("Fallback success");
+
+            let result = with_fallback(primary_fails, fallback_succeeds);
+            assert_eq!(result.unwrap(), "Fallback success");
+        }
     }
+
 }
 
 // MEDIUM CHALLENGE 6: Error handling in iterators and combinators
