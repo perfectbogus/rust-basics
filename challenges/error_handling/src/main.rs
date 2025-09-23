@@ -6,6 +6,118 @@ use std::fmt;
 fn main() {
     println!("hello world");
 }
+
+// HARD CHALLENGE 8: Error context and error chaining
+// Goal: Build rich error context with source chains
+mod hard_challenge_8 {
+    use super::*;
+
+    #[derive(Debug)]
+    struct ErrorContext {
+        message: String,
+        origin: Option<Box<dyn std::error::Error + Send + Sync>>,
+        location: String,
+    }
+
+    impl fmt::Display for ErrorContext {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(f, "{} at {}", self.message, self.location)
+        }
+    }
+
+    impl std::error::Error for ErrorContext {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            self.origin.as_ref().map(|e| e.as_ref() as &(dyn std::error::Error + 'static))
+        }
+    }
+
+    // TODO: Implement error context builder
+    trait ErrorExt<T> {
+        fn with_context<F>(self, f: F) -> Result<T, ErrorContext>
+        where
+            F: FnOnce() -> String;
+
+        fn with_location(self, location: &str) -> Result<T, ErrorContext>;
+    }
+
+    impl<T, E> ErrorExt<T> for Result<T, E>
+    where
+        E: std::error::Error + Send + Sync + 'static,
+    {
+        fn with_context<F>(self, f: F) -> Result<T, ErrorContext>
+        where
+            F: FnOnce() -> String,
+        {
+            // TODO: Implement context addition
+            self.map_err(|error| ErrorContext {
+                message: f(),
+                origin: Some(Box::new(error)),
+                location: "Unknown".to_string(),
+            })
+        }
+
+        fn with_location(self, location: &str) -> Result<T, ErrorContext> {
+            // TODO: Implement location addition
+            self.map_err(|error| ErrorContext {
+                message: error.to_string(),
+                origin: Some(Box::new(error)),
+                location: location.to_string(),
+            })
+        }
+    }
+
+    // TODO: Complex operation with rich error context
+    fn complex_file_operation(filename: &str) -> Result<String, ErrorContext> {
+        // Chain multiple operations, each adding context
+        // Read file -> Parse JSON -> Extract field -> Validate
+        let contents = fs::read_to_string(filename)
+            .with_context(|| format!("Failed to read file: {}", filename))?;
+
+        let first_line = contents.lines().next()
+            .ok_or_else(|| ErrorContext {
+                message: "File is empty".to_string(),
+                origin: None,
+                location: "File parsing".to_string(),
+            })?;
+
+        let number: i32 = first_line.parse()
+            .with_context(|| "Failed to parse first line as number".to_string())?;
+
+        if number < 0 {
+            return Err(ErrorContext {
+                message: "Number must be positive".to_string(),
+                origin: None,
+                location: "Validation".to_string(),
+            })
+        }
+
+        Ok(format!("Processed number: {}" , number))
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+        use std::error::Error;
+
+        #[test]
+        fn test_error_context() {
+            let result = complex_file_operation("nonexistent.json");
+            assert!(result.is_err());
+
+            // Error should have rich context chain
+            let err = result.unwrap_err();
+            println!("Error: {}", err);
+
+            // Should be able to walk the error chain
+            let mut source = err.source();
+            while let Some(err) = source {
+                println!("Caused by: {}", err);
+                source = err.source();
+            }
+        }
+    }
+}
+
 // =============================================================================
 // HARD CHALLENGES (7-9): Advanced error handling patterns
 // =============================================================================
@@ -875,87 +987,6 @@ mod easy_challenge_1 {
     }
 }
 
-
-// HARD CHALLENGE 8: Error context and error chaining
-// Goal: Build rich error context with source chains
-mod hard_challenge_8 {
-    use super::*;
-
-    #[derive(Debug)]
-    struct ErrorContext {
-        message: String,
-        source: Option<Box<dyn std::error::Error + Send + Sync>>,
-        location: String,
-    }
-
-    impl fmt::Display for ErrorContext {
-        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            write!(f, "{} at {}", self.message, self.location)
-        }
-    }
-
-    // impl std::error::Error for ErrorContext {
-    //     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-    //         self.source.as_ref().map(|e| e.as_ref())
-    //     }
-    // }
-
-    // TODO: Implement error context builder
-    trait ErrorExt<T> {
-        fn with_context<F>(self, f: F) -> Result<T, ErrorContext>
-        where
-            F: FnOnce() -> String;
-
-        fn with_location(self, location: &str) -> Result<T, ErrorContext>;
-    }
-
-    impl<T, E> ErrorExt<T> for Result<T, E>
-    where
-        E: std::error::Error + Send + Sync + 'static,
-    {
-        fn with_context<F>(self, f: F) -> Result<T, ErrorContext>
-        where
-            F: FnOnce() -> String,
-        {
-            // TODO: Implement context addition
-            unimplemented!()
-        }
-
-        fn with_location(self, location: &str) -> Result<T, ErrorContext> {
-            // TODO: Implement location addition
-            unimplemented!()
-        }
-    }
-
-    // TODO: Complex operation with rich error context
-    fn complex_file_operation(filename: &str) -> Result<String, ErrorContext> {
-        // Chain multiple operations, each adding context
-        // Read file -> Parse JSON -> Extract field -> Validate
-        unimplemented!()
-    }
-
-    #[cfg(test)]
-    mod tests {
-        use super::*;
-
-        #[test]
-        fn test_error_context() {
-            let result = complex_file_operation("nonexistent.json");
-            assert!(result.is_err());
-
-            // Error should have rich context chain
-            let err = result.unwrap_err();
-            println!("Error: {}", err);
-
-            // Should be able to walk the error chain
-            // let mut source = err.source();
-            // while let Some(err) = source {
-            //     println!("Caused by: {}", err);
-            //     source = err.source();
-            // }
-        }
-    }
-}
 
 // HARD CHALLENGE 9: Error handling in async/concurrent contexts
 // Goal: Handle errors across async boundaries and threads
