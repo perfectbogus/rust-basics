@@ -7,6 +7,187 @@ fn main() {
     println!("hello world");
 }
 
+// HARD CHALLENGE 9: Error handling in async/concurrent contexts
+// Goal: Handle errors across async boundaries and threads
+mod hard_challenge_9 {
+    use super::*;
+    use std::error::Error;
+    use std::sync::Arc;
+    use std::thread;
+    use std::sync::mpsc;
+
+    #[derive(Debug)]
+    enum ConcurrentError {
+        ThreadPanic(String),
+        Timeout,
+        AggregateError(Vec<Box<dyn std::error::Error + Send + Sync>>),
+        PartialFailure { successes: usize, failures: usize },
+    }
+
+    impl fmt::Display for ConcurrentError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            // TODO: Implement Display
+            match self {
+                ConcurrentError::ThreadPanic(msg) => write!(f, "Thread panicked: {}", msg),
+                ConcurrentError::Timeout => write!(f, "Timeout"),
+                ConcurrentError::AggregateError(errors) => write!(f, "Multiple errors occured: {}" , errors.len()),
+                ConcurrentError::PartialFailure { successes, failures } => write!(f, "Partial failure: {} successes, {} failures", successes, failures),
+            }
+        }
+    }
+
+    impl Error for ConcurrentError {}
+
+    // TODO: Execute operations in parallel, collect all errors
+    fn parallel_process<T, F>(
+        inputs: Vec<T>,
+        operation: F,
+    ) -> Result<Vec<T>, ConcurrentError>
+    where
+        T: Send + 'static + Clone,
+        F: Fn(T) -> Result<T, Box<dyn Error + Send + Sync>> + Send + Sync + 'static,
+    {
+        // Process inputs in parallel threads
+        // If any fail, collect all errors and return AggregateError
+        // If all succeed, return all results
+        let operation = Arc::new(operation);
+        let mut handles = Vec::new();
+
+        for input in inputs {
+            let op = Arc::clone(&operation);
+            let handle = thread::spawn(move || op(input));
+            handles.push(handle);
+        }
+
+        let mut results = Vec::new();
+        let mut errors = Vec::new();
+
+        for handle in handles {
+            match handle.join() {
+                Ok(Ok(result)) => results.push(result),
+                Ok(Err(error)) => errors.push(error),
+                Err(_) => errors.push("Thread panic".into()),
+            }
+        }
+
+        if errors.is_empty() {
+            Ok(results)
+        } else {
+            Err(ConcurrentError::AggregateError(errors))
+        }
+    }
+
+    // TODO: Race multiple operations, return first success or all errors
+    fn race_operations<T, F>(
+        operations: Vec<F>,
+    ) -> Result<T, ConcurrentError>
+    where
+        T: Send + 'static,
+        F: Fn() -> Result<T, Box<dyn std::error::Error + Send + Sync>> + Send + 'static,
+    {
+        // Run all operations concurrently
+        // Return first successful result
+        // If all fail, return AggregateError with all failures
+        let (tx, rx) = mpsc::channel();
+        let mut handles = Vec::new();
+
+        for operation in operations {
+            let tx_clone = tx.clone();
+            let handle = thread::spawn(move || {
+                let result = operation();
+                tx_clone.send(result).ok();
+            });
+            handles.push(handle);
+        }
+
+        drop(tx);
+
+        let mut errors = Vec::new();
+        while let Ok(result) = rx.recv() {
+            match result {
+                Ok(value) => return Ok(value),
+                Err(error) => errors.push(error),
+            }
+        }
+
+        Err(ConcurrentError::AggregateError(errors))
+    }
+
+    // TODO: Partial success handler
+    fn batch_process_tolerant<T, F>(
+        inputs: Vec<T>,
+        operation: F,
+        min_success_rate: f64,
+    ) -> Result<Vec<T>, ConcurrentError>
+    where
+        T: Send + 'static + Clone,
+        F: Fn(T) -> Result<T, Box<dyn Error + Send + Sync>> + Send + Sync + 'static,
+    {
+        // Process all inputs, allow some failures
+        // Return success if success_rate >= min_success_rate
+        // Otherwise return PartialFailure error
+        let operation = Arc::new(operation);
+        let mut handles = Vec::new();
+
+        for input in inputs {
+            let op = Arc::clone(&operation);
+            let handle = thread::spawn(move || op(input));
+            handles.push(handle);
+        }
+
+        let mut results = Vec::new();
+        let mut error_count = 0;
+        let total_count = handles.len();
+
+        for handle in handles {
+            match handle.join() {
+                Ok(Ok(result)) => results.push(result),
+                Ok(Err(_)) | Err(_) => error_count += 1,
+            }
+        }
+
+        let success_rate = results.len() as f64 / total_count as f64;
+
+        if success_rate >= min_success_rate {
+            Ok(results)
+        } else {
+            Err(ConcurrentError::PartialFailure {
+                successes: results.len(),
+                failures: error_count,
+            })
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn test_parallel_processing() {
+            let inputs = vec![1, 2, 3, 4, 5];
+
+            let operation = |x: i32| -> Result<i32, Box<dyn Error + Send + Sync>> {
+                if x == 3 {
+                    Err("Failed on 3".into())
+                } else {
+                    Ok(x * 2)
+                }
+            };
+
+            let result = parallel_process(inputs, operation);
+            assert!(result.is_err());
+
+            // Should contain aggregate error with the failure
+            match result.unwrap_err() {
+                ConcurrentError::AggregateError(errors) => {
+                    assert_eq!(errors.len(), 1);
+                }
+                _ => panic!("Expected AggregateError"),
+            }
+        }
+    }
+}
+
 // HARD CHALLENGE 8: Error context and error chaining
 // Goal: Build rich error context with source chains
 mod hard_challenge_8 {
@@ -983,106 +1164,6 @@ mod easy_challenge_1 {
             assert_eq!(calculate_average(vec!["10", "20", "30"]).unwrap(), 20.0);
             assert!(calculate_average(vec!["10", "abc", "30"]).is_err());
             assert!(calculate_average(vec![]).is_err());
-        }
-    }
-}
-
-
-// HARD CHALLENGE 9: Error handling in async/concurrent contexts
-// Goal: Handle errors across async boundaries and threads
-mod hard_challenge_9 {
-    use super::*;
-    use std::sync::Arc;
-    use std::thread;
-
-    #[derive(Debug)]
-    enum ConcurrentError {
-        ThreadPanic(String),
-        Timeout,
-        AggregateError(Vec<Box<dyn std::error::Error + Send + Sync>>),
-        PartialFailure { successes: usize, failures: usize },
-    }
-
-    impl fmt::Display for ConcurrentError {
-        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            // TODO: Implement Display
-            unimplemented!()
-        }
-    }
-
-    impl std::error::Error for ConcurrentError {}
-
-    // TODO: Execute operations in parallel, collect all errors
-    fn parallel_process<T, F>(
-        inputs: Vec<T>,
-        operation: F,
-    ) -> Result<Vec<T>, ConcurrentError>
-    where
-        T: Send + 'static + Clone,
-        F: Fn(T) -> Result<T, Box<dyn std::error::Error + Send + Sync>> + Send + Sync + 'static,
-    {
-        // Process inputs in parallel threads
-        // If any fail, collect all errors and return AggregateError
-        // If all succeed, return all results
-        unimplemented!()
-    }
-
-    // TODO: Race multiple operations, return first success or all errors
-    fn race_operations<T, F>(
-        operations: Vec<F>,
-    ) -> Result<T, ConcurrentError>
-    where
-        T: Send + 'static,
-        F: Fn() -> Result<T, Box<dyn std::error::Error + Send + Sync>> + Send + 'static,
-    {
-        // Run all operations concurrently
-        // Return first successful result
-        // If all fail, return AggregateError with all failures
-        unimplemented!()
-    }
-
-    // TODO: Partial success handler
-    fn batch_process_tolerant<T, F>(
-        inputs: Vec<T>,
-        operation: F,
-        min_success_rate: f64,
-    ) -> Result<Vec<T>, ConcurrentError>
-    where
-        T: Send + 'static + Clone,
-        F: Fn(T) -> Result<T, Box<dyn std::error::Error + Send + Sync>> + Send + Sync + 'static,
-    {
-        // Process all inputs, allow some failures
-        // Return success if success_rate >= min_success_rate
-        // Otherwise return PartialFailure error
-        unimplemented!()
-    }
-
-    #[cfg(test)]
-    mod tests {
-        use super::*;
-
-        #[test]
-        fn test_parallel_processing() {
-            let inputs = vec![1, 2, 3, 4, 5];
-
-            let operation = |x: i32| -> Result<i32, Box<dyn std::error::Error + Send + Sync>> {
-                if x == 3 {
-                    Err("Failed on 3".into())
-                } else {
-                    Ok(x * 2)
-                }
-            };
-
-            let result = parallel_process(inputs, operation);
-            assert!(result.is_err());
-
-            // Should contain aggregate error with the failure
-            match result.unwrap_err() {
-                ConcurrentError::AggregateError(errors) => {
-                    assert_eq!(errors.len(), 1);
-                }
-                _ => panic!("Expected AggregateError"),
-            }
         }
     }
 }
