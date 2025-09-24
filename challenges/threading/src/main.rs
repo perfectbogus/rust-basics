@@ -71,4 +71,5 @@ fn main() {
 
     println!("Final Value: {}", counter.get_value());
 
+    counter.reset();    
 }
